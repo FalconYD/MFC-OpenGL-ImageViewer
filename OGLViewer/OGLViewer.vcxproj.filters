@@ -1,0 +1,100 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="소스 파일">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="헤더 파일">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="리소스 파일">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="MainClass">
+      <UniqueIdentifier>{ac2aeef7-9e81-4d96-b265-3bb3b770082d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MainClass\GLElements">
+      <UniqueIdentifier>{370fb8d0-5e4f-4e3f-a8ea-efd8004478ed}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="OGLViewer.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="pch.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="ImageViewer.cpp">
+      <Filter>MainClass</Filter>
+    </ClCompile>
+    <ClCompile Include="GLImage.cpp">
+      <Filter>MainClass\GLElements</Filter>
+    </ClCompile>
+    <ClCompile Include="GLWindow.cpp">
+      <Filter>MainClass\GLElements</Filter>
+    </ClCompile>
+    <ClCompile Include="GLFont.cpp">
+      <Filter>MainClass\GLElements</Filter>
+    </ClCompile>
+    <ClCompile Include="GLShape.cpp">
+      <Filter>MainClass\GLElements</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="OGLViewer.def">
+      <Filter>소스 파일</Filter>
+    </None>
+    <None Include="res\OGLViewer.rc2">
+      <Filter>리소스 파일</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="framework.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="targetver.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Resource.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="OGLViewer.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="pch.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="libOGLViewer.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="ImageViewer.h">
+      <Filter>MainClass</Filter>
+    </ClInclude>
+    <ClInclude Include="GLBase.h">
+      <Filter>MainClass\GLElements</Filter>
+    </ClInclude>
+    <ClInclude Include="GLImage.h">
+      <Filter>MainClass\GLElements</Filter>
+    </ClInclude>
+    <ClInclude Include="GLWindow.h">
+      <Filter>MainClass\GLElements</Filter>
+    </ClInclude>
+    <ClInclude Include="GLFont.h">
+      <Filter>MainClass\GLElements</Filter>
+    </ClInclude>
+    <ClInclude Include="GLUtil.h">
+      <Filter>MainClass\GLElements</Filter>
+    </ClInclude>
+    <ClInclude Include="GLShape.h">
+      <Filter>MainClass\GLElements</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="OGLViewer.rc">
+      <Filter>리소스 파일</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+</Project>

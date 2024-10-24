@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ImportGroup Label="PropertySheets" />
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <IncludePath>$(SolutionDir)Include\;$(SolutionDir)Include\freetype\;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)Lib\;$(LibraryPath)</LibraryPath>
+    <ExecutablePath>$(SolutionDir)Lib\freetype\;$(ExecutablePath)</ExecutablePath>
+  </PropertyGroup>
+  <ItemDefinitionGroup />
+  <ItemGroup />
+</Project>
