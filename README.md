@@ -12,12 +12,12 @@
 	[-]
 
 ## Feature
-	- Mouse Wheel Up/Down : 이미지 확대/축소
+	- Mouse Wheel Up/Down : 이미지 확대/축소 (마우스 포인터 기준으로)
 	- Mouse Left Drag : 이미지 Pan
 	- Mouse Right Click : 1x Image
 	- Mouse Wheel Click : Fit Image
 	
-![Program](ImageViewer.png){: width="100%" height="100%"}
+![Program](ImageViewer.png)
 
 ## Library
 	- freetype-2.13.3
