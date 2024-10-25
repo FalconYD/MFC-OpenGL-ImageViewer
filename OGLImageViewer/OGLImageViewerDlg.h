@@ -42,4 +42,5 @@ public:
 	cv::Mat m_matBuff;
 	cv::VideoCapture m_cap;
 	afx_msg void OnTimer(UINT_PTR nIDEvent);
+	afx_msg void OnBnClickedBnShape();
 };

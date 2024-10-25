@@ -63,17 +63,14 @@ BOOL ImageViewer::Create(DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT
 		
 		m_pGLText->SetText("SCALE", "Scale : %.2lf x", static_cast<float>(-dHalfWidth + 5), static_cast<float>(-dHalfHeight + 5 + 20), 0.4f, glm::vec3(1.0, 0.0, 1.0), EN_TEXTSTYLE::EN_BINDING, cbScale);
 		
-		//m_pGLText->SetText("FRAME", "Test2", static_cast<float>( - dHalfWidth + 5 + 100), static_cast<float>( - dHalfHeight + 5), 0.4f, glm::vec3(1.0, 0.0, 1.0));
-		//m_pGLText->BindTextFunc("FrameRate : %.2lf", cbFrameRate);
-		
 		m_pGLText->SetText("WH", "WH : %.2lf, %.2lf", static_cast<float>(-dHalfWidth + 5), static_cast<float>(-dHalfHeight + 5), 0.4f, glm::vec3(1.0, 0.0, 1.0), EN_TEXTSTYLE::EN_BINDING, nullptr, cbWidthHeight);
 		
 		m_pGL->Add((GLBase*)m_pGLText);
 
 		m_pGLShape = new GLShape();
 		m_pGLShape->Init(m_pGL->GetClientRect().Width(), m_pGL->GetClientRect().Height());
-		m_pGLShape->AddRectangle(-100, -100, 100, 100, glm::vec3(1,0,0), 1);
-		m_pGLShape->AddCircle(-50, -50, 100, 100, glm::vec3(0,1,0), 1);
+		//m_pGLShape->AddRectangle(-100, -100, 100, 100, glm::vec3(1,0,0), 1);
+		//m_pGLShape->AddCircle(-50, -50, 100, 100, glm::vec3(0,1,0), 1);
 		m_pGL->Add((GLBase*)m_pGLShape);
 		
 		SetTimer(EN_TIMER, 1, nullptr);

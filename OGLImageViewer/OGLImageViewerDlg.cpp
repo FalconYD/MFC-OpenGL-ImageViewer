@@ -75,6 +75,7 @@ BEGIN_MESSAGE_MAP(COGLImageViewerDlg, CDialogEx)
 	ON_WM_DESTROY()
 	ON_BN_CLICKED(IDC_BUTTON2, &COGLImageViewerDlg::OnBnClickedButton2)
 	ON_WM_TIMER()
+	ON_BN_CLICKED(IDC_BN_SHAPE, &COGLImageViewerDlg::OnBnClickedBnShape)
 END_MESSAGE_MAP()
 
 
@@ -248,4 +249,11 @@ void COGLImageViewerDlg::OnTimer(UINT_PTR nIDEvent)
 	}
 
 	//CDialogEx::OnTimer(nIDEvent);
+}
+
+
+void COGLImageViewerDlg::OnBnClickedBnShape()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+
 }
