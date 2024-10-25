@@ -3,7 +3,9 @@
 
 GLShape::GLShape()
 {
-
+    m_zoom = glm::vec3(1.0);
+    m_imagewidth = 0;
+    m_imageheight = 0;
 }
 
 GLShape::~GLShape()
@@ -15,7 +17,7 @@ void GLShape::Init(int clientwidth, int clientheight)
 {
 	m_clientwidth = clientwidth;
 	m_clientheight = clientheight;
-	std::string VertexShaderCode = R"(
+    std::string VertexShaderCode = R"(
 #version 460
 
 layout(std430, binding = 0) buffer TVertex
@@ -69,13 +71,13 @@ void main()
 
 	// Read the Fragment Shader code from the file
 	std::string FragmentShaderCode = R"(
-#version 460
+#version 330
 
 out vec4 fragColor;
-
+uniform vec3 shapeColor;
 void main()
 {
-    fragColor = vec4(1.0);
+    fragColor = vec4(shapeColor, 1.0);
 }
 )";
     m_programID = GLUtil::LoadShader(VertexShaderCode, FragmentShaderCode);
@@ -83,109 +85,266 @@ void main()
     m_locres = glGetUniformLocation(m_programID, "u_resolution");
     m_locthi = glGetUniformLocation(m_programID, "u_thickness");
 
-    m_Projection = glm::ortho(-(float)(m_clientwidth / 2.0), (float)(m_clientwidth / 2.0), (float)(m_clientheight / 2.0), -(float)(m_clientheight / 2.0), -10.f, 10.f);
-    
-    GLushort pattern = 0x18ff;
-    GLfloat  factor = 2.0f;
+    m_shapecolor = glGetUniformLocation(m_programID, "shapeColor");
 
-    glm::vec4 p0(-1.0f, -1.0f, 0.0f, 1.0f);
-    glm::vec4 p1(1.0f, -1.0f, 0.0f, 1.0f);
-    glm::vec4 p2(1.0f, 1.0f, 0.0f, 1.0f);
-    glm::vec4 p3(-1.0f, 1.0f, 0.0f, 1.0f);
-    varray1 = { p3, p0, p1, p2, p3, p0, p1 };
-    
-    glUseProgram(m_programID);
+    m_scale = glm::scale(m_zoom);
+    m_Projection = glm::ortho(-(float)(m_clientwidth / 2.0), (float)(m_clientwidth / 2.0), (float)(m_clientheight / 2.0), -(float)(m_clientheight / 2.0), -10.f, 100.f);
+    m_View = glm::lookAt(
+        //glm::vec3(4, 3, 3),// Camera is at (4,3,3), in World Space
+        glm::vec3(0, 0, 1),// Camera is at (4,3,3), in World Space
+        glm::vec3(0, 0, 0),// and looks at the origin
+        glm::vec3(0, 1, 0)// Head is up (set to 0,-1,0 to look upside-down)
+    );
 
-    glGenBuffers(1, &ssbo1);
-    glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo1);
-    glBufferData(GL_SHADER_STORAGE_BUFFER, varray1.size() * sizeof(*varray1.data()), varray1.data(), GL_STATIC_DRAW);
+    m_Model = glm::mat4(1.0f);
+    m_mvp = m_Projection * m_View * m_Model; // Remember, matrix multiplication is the other way around
 
-    
-    //for (int u = -8; u <= 368; u += 8)
-    //{
-    //    double a = u * CV_PI / 180.0;
-    //    double c = std::cos(a), s = std::sin(a);
-    //    varray2.emplace_back(glm::vec4((float)c, (float)s, 0.0f, 1.0f));
-    //}
-    //
-    //
-    //glGenBuffers(1, &ssbo2);
-    //glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo2);
-    //glBufferData(GL_SHADER_STORAGE_BUFFER, varray2.size() * sizeof(*varray2.data()), varray2.data(), GL_STATIC_DRAW);
-    
-    
+
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
 
-    //glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-    
     GLUtil::GetGLError();
 }
 
 void GLShape::Final()
 {
+    for (int i = 0; i < vshapes.size(); i++)
+    {
+        glDeleteBuffers(1, &vshapes[i].ssbo);
+    }
+    glDeleteProgram(m_programID);
 }
 
 void GLShape::Draw()
 {
-    int w, h;
-    //glfwGetFramebufferSize(window, &w, &h);
-    //if (w != vpSize[0] || h != vpSize[1])
-    //{
-    //    vpSize[0] = w; vpSize[1] = h;
-    //    glViewport(0, 0, vpSize[0], vpSize[1]);
-    //    float aspect = (float)w / (float)h;
-    //    project = glm::ortho(-aspect, aspect, -1.0f, 1.0f, -10.0f, 10.0f);
-    //    glUniform2f(loc_res, (float)w, (float)h);
-    //}
-    glClear(GL_COLOR_BUFFER_BIT);
+    m_Model = m_translate * m_scale * glm::mat4(1.0f);
+    m_mvp = m_Projection * m_Model;
 
     glUseProgram(m_programID);
-    glUniform1f(m_locthi, 20.0);
+    glUniform2f(m_locres, m_clientwidth, m_clientheight);
+    glUniformMatrix4fv(m_locmvp, 1, GL_FALSE, glm::value_ptr(m_mvp));
     glBindVertexArray(vao);
-    glm::mat4 modelview1(1.0f);
-    modelview1 = glm::translate(modelview1, glm::vec3(-0.6f, 0.0f, 0.0f));
-    modelview1 = glm::scale(modelview1, glm::vec3(0.5f, 0.5f, 1.0f));
-    glm::mat4 mvp1 = m_Projection * modelview1;
-    
-    //glUniformMatrix4fv(m_locmvp, 1, GL_FALSE, glm::value_ptr(mvp1));
-    glUniformMatrix4fv(m_locmvp, 1, GL_FALSE, &mvp1[0][0]);
-    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, ssbo1);
-    GLsizei N1 = (GLsizei)varray1.size() - 2;
-    glDrawArrays(GL_TRIANGLES, 0, 6 * (N1 - 1));
-    //glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(varray1.size() * 3));
-    
-    
-    //glm::mat4 modelview2(1.0f);
-    //modelview2 = glm::translate(modelview2, glm::vec3(0.6f, 0.0f, 0.0f));
-    //modelview2 = glm::scale(modelview2, glm::vec3(0.5f, 0.5f, 1.0f));
-    //glm::mat4 mvp2 = m_Projection * modelview2;
-    //
-    //glUniformMatrix4fv(m_locmvp, 1, GL_FALSE, &mvp2[0][0]);
-    //glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, ssbo2);
-    //GLsizei N2 = (GLsizei)varray2.size() - 2;
-    //glDrawArrays(GL_TRIANGLES, 0, 6 * (N2 - 1));
+
+    GLsizei N;
+    for (int i = 0; i < vshapes.size(); i++)
+    {
+        glUniform1f(m_locthi, vshapes[i].thick * m_zoom.x);
+        glUniform3f(m_shapecolor, vshapes[i].color.x, vshapes[i].color.y, vshapes[i].color.z);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, vshapes[i].ssbo);
+        N = (GLsizei)vshapes[i].vertex.size() - 2;
+        glDrawArrays(GL_TRIANGLES, 0, 6 * (N - 1));
+
+    }
+
+    glBindVertexArray(0);
 }
 
 void GLShape::OnSize(int width, int height)
 {
     m_clientwidth = width;
     m_clientheight = height;
+
+    m_Projection = glm::ortho(-(float)(m_clientwidth / 2.0), (float)(m_clientwidth / 2.0), (float)(m_clientheight / 2.0), -(float)(m_clientheight / 2.0), -10.f, 10.f);
+
+    m_mvp = m_Projection * m_View * m_Model; // Remember, matrix multiplication is the other way around
 }
 
 void GLShape::MouseMove(GLFWwindow* win, double xpos, double ypos)
 {
+    m_movePoint = glm::vec3(xpos, ypos, 0);
+    switch (m_enMouseMode)
+    {
+    case EN_MOUSEMODE::EN_PRESS:
+    {
+
+        m_currPoint = glm::vec3(xpos, ypos, 0);
+        m_move += m_currPoint - m_prevPoint;
+        m_prevPoint = m_currPoint;
+
+        m_translate = glm::translate(glm::mat4(), m_move);
+
+        //SetRectangle();
+    }
+    break;
+    }
 }
 
 void GLShape::MouseButton(GLFWwindow* win, int button, int action, int mods)
 {
+    if (action == GLFW_PRESS) {
+        switch (button)
+        {
+        case 0:
+        {
+            double xpos, ypos;
+            glfwGetCursorPos(win, &xpos, &ypos);
+            m_prevPoint = glm::vec3(xpos, ypos, 0);
+            m_enMouseMode = EN_MOUSEMODE::EN_PRESS;
+        }
+        break;
+        case 1:
+            m_move = glm::vec3(0, 0, 0);
+            m_translate = glm::translate(glm::mat4(), m_move);
+
+            m_zoom = glm::vec3(1, 1, 1);
+            m_scale = glm::scale(m_zoom);
+            break;
+        case 2:
+        {
+            m_move = glm::vec3(0, 0, 0);
+            m_translate = glm::translate(glm::mat4(), m_move);
+
+            float fitscale = getfitscale();
+            m_zoom = glm::vec3(fitscale, fitscale, 1);
+            m_scale = glm::scale(m_zoom);
+        }
+        break;
+        }
+    }
+    if (action == GLFW_RELEASE)
+    {
+        m_enMouseMode = EN_MOUSEMODE::EN_RELEASE;
+    }
 }
 
 void GLShape::MouseScroll(GLFWwindow* win, double xpos, double ypos)
 {
+    if (ypos != 0.0f)
+    {
+        float prevx = getimgposx(m_movePoint.x);
+        float prevy = getimgposy(m_movePoint.y);
+        if (ypos > 0)
+        {
+            m_zoom *= 1 / 0.9;
+        }
+        else
+        {
+            m_zoom *= 0.9;
+        }
+        m_scale = glm::scale(m_zoom);
+
+        float currx = getimgposx(m_movePoint.x);
+        float curry = getimgposy(m_movePoint.y);
+        m_move.x += (currx - prevx) * m_zoom.x;
+        m_move.y += (curry - prevy) * m_zoom.y;
+        m_translate = glm::translate(glm::mat4(), m_move);
+
+        for (int i = 0; i < vshapes.size(); i++)
+        {
+            vshapes[i].thick = 1.0 * m_zoom.x;
+        }
+    }
 }
 
 void GLShape::KeyboardCallback(GLFWwindow* win, int key, int scancode, int action, int mods)
 {
+    if (action == GLFW_PRESS) {
+
+    }
+
+    if (action == GLFW_RELEASE) {
+
+    }
+}
+
+void GLShape::AddRectangle(float x, float y, float w, float h, glm::vec3 color, float thick)
+{
+    float l = x;
+    float t = y;
+    float r = x+w;
+    float b = y+h;
+    //glm::vec4 p0(-RECTX, -RECTY, 0.0f, 1.0f);
+    //glm::vec4 p1(RECTX, -RECTY, 0.0f, 1.0f);
+    //glm::vec4 p2(RECTX, RECTY, 0.0f, 1.0f);
+    //glm::vec4 p3(-RECTX, RECTY, 0.0f, 1.0f);
+    glm::vec4 p0(l, t, -1.0f, 1.0f);
+    glm::vec4 p1(r, t, -1.0f, 1.0f);
+    glm::vec4 p2(r, b, -1.0f, 1.0f);
+    glm::vec4 p3(l, b, -1.0f, 1.0f);
+    ST_SHAPE stShape(EN_SHAPEDEF::EN_SHAPE_RECT, { p3, p0, p1, p2, p3, p0, p1 }, thick, color);
+    glGenBuffers(1, &stShape.ssbo);
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, stShape.ssbo);
+    glBufferData(GL_SHADER_STORAGE_BUFFER, stShape.vertex.size() * sizeof(*stShape.vertex.data()), stShape.vertex.data(), GL_STATIC_DRAW);
+
+    vshapes.emplace_back(stShape);
+}
+
+void GLShape::SetRectangle(float x, float y, float w, float h, glm::vec3 color, float thick)
+{
+    float l = x;
+    float t = y;
+    float r = x + w;
+    float b = y + h;
+
+    for (int i = 0; i < vshapes.size(); i++)
+    {
+        switch (vshapes[i].shape)
+        {
+        case EN_SHAPE_RECT:
+            //vshapes[i].moveable = true;
+            glm::vec4 p0(l, t, -1.0f, 1.0f);
+            glm::vec4 p1(r, t, -1.0f, 1.0f);
+            glm::vec4 p2(r, b, -1.0f, 1.0f);
+            glm::vec4 p3(l, b, -1.0f, 1.0f);
+
+            vshapes[i].vertex[0] = p3;
+            vshapes[i].vertex[1] = p0;
+            vshapes[i].vertex[2] = p1;
+            vshapes[i].vertex[3] = p2;
+            vshapes[i].vertex[4] = p3;
+            vshapes[i].vertex[5] = p0;
+            vshapes[i].vertex[6] = p1;
+
+            vshapes[i].color = color;
+            vshapes[i].thick = thick;
+
+            glBindBuffer(GL_SHADER_STORAGE_BUFFER, vshapes[i].ssbo);
+            glBufferData(GL_SHADER_STORAGE_BUFFER, vshapes[i].vertex.size() * sizeof(*vshapes[i].vertex.data()), vshapes[i].vertex.data(), GL_STATIC_DRAW);
+            break;
+        }
+    }
+}
+
+void GLShape::AddCircle(float x, float y, float elSizeX, float elSizeY, glm::vec3 color, float thick)
+{
+    std::vector<glm::vec4> vec;
+    for (int u = -8; u <= 368; u += 8)
+    {
+        double a = u * CV_PI / 180.0;
+        double c = std::cos(a);
+        double s = std::sin(a);
+        vec.emplace_back(glm::vec4(elSizeX / 2.f * (float)c + x, elSizeY / 2.f * (float)s + y, -1.0f, 1.0f));
+    }
+    ST_SHAPE stShape(EN_SHAPEDEF::EN_SHAPE_CIRCLE, vec, thick, color);
+    glGenBuffers(1, &stShape.ssbo);
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, stShape.ssbo);
+    glBufferData(GL_SHADER_STORAGE_BUFFER, stShape.vertex.size() * sizeof(*stShape.vertex.data()), stShape.vertex.data(), GL_STATIC_DRAW);
+
+    vshapes.emplace_back(stShape);
+}
+
+void GLShape::UpdateImageSize(int width, int height)
+{
+    m_imagewidth = width;
+    m_imageheight = height;
+}
+
+float GLShape::getfitscale()
+{
+    float xScale = m_clientwidth / (float)m_imagewidth;
+    float yScale = m_clientheight / (float)m_imageheight;
+    float fitscale = xScale < yScale ? xScale : yScale;
+    return fitscale;
+}
+
+float GLShape::getimgposx(float x)
+{
+    return (x - ((m_clientwidth - m_imagewidth * m_zoom.x) / 2.f) - m_move.x) / m_zoom.x;
+    //return x;
+}
+
+float GLShape::getimgposy(float y)
+{
+    return (y - ((m_clientheight - m_imageheight * m_zoom.y) / 2.f) - m_move.y) / m_zoom.y;
+    //return y;
 }

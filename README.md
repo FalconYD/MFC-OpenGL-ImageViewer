@@ -1,12 +1,15 @@
 # OGLImageViewer
  MFC OpenGL Image Viewer. dll Lib형태로 작업하였으며, MFC에 Picture Frame에 Attach하는 방식.
 
+ 해당 Lib를 수정하여 사용해도 되고, 단순 뷰어를 원할 경우 DLL로 Include 하여 사용.
+
 ## Done
-	[x] Image Load
-	[x] Mouse Position And Image Infomation
+	-[x] Image Load
+	-[x] Mouse Position And Image Infomation
+	-[x] Shape Draw
 
 ## Todo
-	[ ] Shape Draw
+	-[-]
 
 ## Library
 	- freetype-2.13.3

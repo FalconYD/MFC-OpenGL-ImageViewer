@@ -70,9 +70,11 @@ BOOL ImageViewer::Create(DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT
 		
 		m_pGL->Add((GLBase*)m_pGLText);
 
-		//m_pGLShape = new GLShape();
-		//m_pGLShape->Init(m_pGL->GetClientRect().Width(), m_pGL->GetClientRect().Height());
-		//m_pGL->Add((GLBase*)m_pGLShape);
+		m_pGLShape = new GLShape();
+		m_pGLShape->Init(m_pGL->GetClientRect().Width(), m_pGL->GetClientRect().Height());
+		m_pGLShape->AddRectangle(-100, -100, 100, 100, glm::vec3(1,0,0), 1);
+		m_pGLShape->AddCircle(-50, -50, 100, 100, glm::vec3(0,1,0), 1);
+		m_pGL->Add((GLBase*)m_pGLShape);
 		
 		SetTimer(EN_TIMER, 1, nullptr);
 	}
@@ -112,6 +114,7 @@ void ImageViewer::OnTimer(UINT_PTR nIDEvent)
 void ImageViewer::LoadImg(std::string strfilename)
 {
 	m_pGLImage->LoadImg(strfilename);
+	m_pGLShape->UpdateImageSize(m_pGLImage->GetImageWidth(), m_pGLImage->GetImageHeight());
 }
 
 double ImageViewer::cbFrameRate()
@@ -148,6 +151,12 @@ void ImageViewer::OnDestroy()
 		m_pGL = nullptr;
 	}
 
+	if (m_pGLShape != nullptr)
+	{
+		delete (GLShape*)m_pGLShape;
+		m_pGLShape = nullptr;
+	}
+
 	if (m_pGLText != nullptr)
 	{
 		delete (GLFont*)m_pGLText;
@@ -159,6 +168,7 @@ void ImageViewer::OnDestroy()
 		delete (GLImage*)m_pGLImage;
 		m_pGLImage = nullptr;
 	}
+
 }
 
 

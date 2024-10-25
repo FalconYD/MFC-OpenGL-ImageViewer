@@ -109,7 +109,7 @@ int GLFont::CreateFontFT(std::string font_name, int width, int height)
 {
     std::string VertexShaderCode =
         "\
-#version 330 core\n\
+#version 460 core\n\
 layout(location = 0) in vec4 vertex; // <vec2 pos, vec2 tex>\n\
 out vec2 TexCoords;\n\
 \n\
@@ -125,7 +125,7 @@ void main()\n\
     // Read the Fragment Shader code from the file
     std::string FragmentShaderCode =
         "\
-#version 330 core\n\
+#version 460 core\n\
 in vec2 TexCoords;\n\
 out vec4 color;\n\
 \n\
@@ -139,9 +139,7 @@ void main()\n\
 }  \n\
 	";
 
-    glEnable(GL_CULL_FACE);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
     //return 0;
     Shader = GLUtil::LoadShader(VertexShaderCode, FragmentShaderCode);
     //OutputDebugStringA((char*)glewGetErrorString(glGetError())); OutputDebugStringA("\n");
@@ -221,7 +219,9 @@ void main()\n\
     // -----------------------------------
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
-    
+    glEnable(GL_CULL_FACE);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     return 0;
 }
 

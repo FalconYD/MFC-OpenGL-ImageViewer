@@ -36,34 +36,34 @@ void GLImage::Init(int clientwidth, int clientheight)
 	m_clientwidth = clientwidth;
 	m_clientheight = clientheight;
 	std::string VertexShaderCode =
-		"\
-#version 330 core \n\
-// Input vertex data, different for all executions of this shader.\n\
-layout(location = 0) in vec3 vertexPosition_modelspace;\n\
-layout(location = 1) in vec2 vertexUV;\n\
-out vec2 UV;\n\
-uniform mat4 MVP;\n\
-void main() {\n\
-	gl_Position = MVP * vec4(vertexPosition_modelspace, 1);\n\
-	UV = vertexUV;\n\
-}\
-	";
+		R"(
+#version 330 core
+// Input vertex data, different for all executions of this shader.
+layout(location = 0) in vec3 vertexPosition_modelspace;
+layout(location = 1) in vec2 vertexUV;
+out vec2 UV;
+uniform mat4 MVP;
+void main() 
+{
+	gl_Position = MVP * vec4(vertexPosition_modelspace, 1);
+	UV = vertexUV;
+}
+	)";
 
 	// Read the Fragment Shader code from the file
 	std::string FragmentShaderCode =
-		"\
-#version 330 core \n\
-in vec2 UV; \n\
-out vec3 color; \n\
-uniform sampler2D myTextureSampler; \n\
-void main() { \n\
-	color = texture(myTextureSampler, UV).rgb; \n\
-}\
-	";
+		R"(
+#version 330 core
+in vec2 UV;
+out vec3 color;
+uniform sampler2D myTextureSampler;
+void main() {
+	color = texture(myTextureSampler, UV).rgb;
+}
+	)";
 
 
-	glEnable(GL_DEPTH_TEST);
-	glDepthFunc(GL_LESS);
+	
 
 	//glPixelStorei(GL_PACK_ALIGNMENT, 1);
 
@@ -146,13 +146,18 @@ void GLImage::Draw()
 	m_Model = m_translate * m_scale * glm::mat4(1.0f);
 	m_mvp = m_Projection * m_View * m_Model;
 	//---------------------------------------------------------------------------
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	//glPixelStorei(GL_PACK_ALIGNMENT, 1);
 	//m_Text1.RenderText("Test2", 100, 100, 1.0, glm::vec3(1, 0, 0));
+	// 
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LESS);
+
 	// Use our shader
 	glUseProgram(m_programID);
 
-	glUniformMatrix4fv(m_MatrixID, 1, GL_FALSE, &m_mvp[0][0]);
+	//glUniformMatrix4fv(m_MatrixID, 1, GL_FALSE, &m_mvp[0][0]);
+	glUniformMatrix4fv(m_MatrixID, 1, GL_FALSE, glm::value_ptr(m_mvp));
 
 	glBindVertexArray(m_VertexArrayID);
 
@@ -191,6 +196,8 @@ void GLImage::Draw()
 	glDisableVertexAttribArray(1);
 	glBindVertexArray(0);
 	glBindTexture(GL_TEXTURE_2D, 0);
+
+	glDisable(GL_DEPTH_TEST);
 }
 
 void GLImage::OnSize(int width, int height)

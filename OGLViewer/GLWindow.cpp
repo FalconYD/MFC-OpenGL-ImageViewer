@@ -24,10 +24,10 @@ int GLWindow::Init(CWnd* pParent, UINT nID)
 	glfwWindowHint(GLFW_SAMPLES, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // To make MacOS happy; should not be needed
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+	//glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // To make MacOS happy; should not be needed
+	//glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	glfwWindowHint(GLFW_DECORATED, GLFW_FALSE);
-	glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
+	//glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
 
 	m_pParent->GetDlgItem(nID)->GetClientRect(&m_Clientrect);
 	m_window = glfwCreateWindow(m_Clientrect.Width(), m_Clientrect.Height(), "GLWindow", NULL, NULL);
@@ -56,10 +56,11 @@ int GLWindow::Init(CWnd* pParent, UINT nID)
 	}
 	glfwSetInputMode(m_window, GLFW_STICKY_KEYS, GL_TRUE);
 
-	glClearColor(0.0f, 0.0f, 0.4f, 1.0f);
+	//glEnable(GL_DEPTH_TEST);
+	//glDepthFunc(GL_LESS);
+	//glDisable(GL_DEPTH_TEST);
 
-	glEnable(GL_DEPTH_TEST);
-	glDepthFunc(GL_LESS);
+	glfwSwapInterval(1); // VSync
 	return 0;
 }
 
@@ -78,6 +79,7 @@ int GLWindow::Final()
 
 void GLWindow::UpdateDraw()
 {
+	glClearColor(0.0f, 0.0f, 0.4f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	for (int i = 0; i < base.size(); i++)

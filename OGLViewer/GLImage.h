@@ -45,10 +45,10 @@ private:
 	int m_nFPSUpdate;
 	double m_dFrameRate;
 
+
 	inline float getfitscale();
 	inline float getimgposy(float y);
 	inline float getimgposx(float x);
-
 public:
 	virtual void Init(int clientwidth, int clientheight);
 	virtual void Final();
@@ -62,6 +62,9 @@ public:
 	void SetImage(cv::Mat matSrc);
 
 	void LoadImg(std::string strfilename);
+
+	int GetImageWidth() const { return m_matImg.cols; }
+	int GetImageHeight() const { return m_matImg.rows; }
 
 	virtual void MouseMove(GLFWwindow* win, double xpos, double ypos);
 	virtual void MouseButton(GLFWwindow* win, int button, int action, int mods);
