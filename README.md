@@ -16,8 +16,8 @@
 	- Mouse Left Drag : 이미지 Pan
 	- Mouse Right Click : 1x Image
 	- Mouse Wheel Click : Fit Image
-
-	![Program](ImageViewer.png){: width="100%" height="100%"}
+	
+![Program](ImageViewer.png){: width="100%" height="100%"}
 
 ## Library
 	- freetype-2.13.3
