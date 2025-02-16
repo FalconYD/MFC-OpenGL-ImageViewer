@@ -43,4 +43,5 @@ public:
 	cv::VideoCapture m_cap;
 	afx_msg void OnTimer(UINT_PTR nIDEvent);
 	afx_msg void OnBnClickedBnShape();
+	afx_msg void OnBnClickedButton3();
 };

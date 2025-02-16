@@ -6,9 +6,10 @@
 #endif
 #include <windows.h>
 
-DLLTYPE void _libInitCtrl(CWnd* parentWnd, int id);
-DLLTYPE void _libOpenImage(const char* strpath);
-DLLTYPE void _libSetImage(cv::Mat matImg);
+DLLTYPE void _libAddCtrl(int id, CWnd* parentWnd);
+DLLTYPE void _libInitCtrl();
+DLLTYPE void _libOpenImage(int id, const char* strpath);
+DLLTYPE void _libSetImage(int id, cv::Mat matImg);
 //DLLTYPE void _libSetImage(unsigned char* buff, int width, int height, int channel);
 //DLLTYPE void _libFinalCtrl();
-DLLTYPE void _libOnSize(UINT Type);
+DLLTYPE void _libOnSize(int id, UINT Type);

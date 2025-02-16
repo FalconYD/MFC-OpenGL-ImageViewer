@@ -76,6 +76,7 @@ BEGIN_MESSAGE_MAP(COGLImageViewerDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BUTTON2, &COGLImageViewerDlg::OnBnClickedButton2)
 	ON_WM_TIMER()
 	ON_BN_CLICKED(IDC_BN_SHAPE, &COGLImageViewerDlg::OnBnClickedBnShape)
+	ON_BN_CLICKED(IDC_BUTTON3, &COGLImageViewerDlg::OnBnClickedButton3)
 END_MESSAGE_MAP()
 
 
@@ -111,7 +112,11 @@ BOOL COGLImageViewerDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// 작은 아이콘을 설정합니다.
 
 	// TODO: 여기에 추가 초기화 작업을 추가합니다.
-	_libInitCtrl(this, IDC_PIC);
+	_libAddCtrl(IDC_PIC, this);
+	_libAddCtrl(IDC_PIC2, this);
+
+	_libInitCtrl();
+	//_libInitCtrl(this, IDC_PIC);
 	m_bCap = false;
 
 	return TRUE;  // 포커스를 컨트롤에 설정하지 않으면 TRUE를 반환합니다.
@@ -175,7 +180,7 @@ void COGLImageViewerDlg::OnBnClickedButton1()
 	if (fdlg.DoModal() == IDOK)
 	{
 		CStringA strFileName (fdlg.GetPathName());
-		_libOpenImage(strFileName.GetBuffer());
+		_libOpenImage(IDC_PIC, strFileName.GetBuffer());
 	}
 
 }
@@ -203,7 +208,7 @@ void COGLImageViewerDlg::OnSize(UINT nType, int cx, int cy)
 	CDialogEx::OnSize(nType, cx, cy);
 
 	// TODO: 여기에 메시지 처리기 코드를 추가합니다.
-	_libOnSize(nType);
+	_libOnSize(IDC_PIC, nType);
 }
 
 
@@ -242,7 +247,7 @@ void COGLImageViewerDlg::OnTimer(UINT_PTR nIDEvent)
 		if (m_cap.isOpened())
 		{
 			m_cap.read(m_matBuff);
-			_libSetImage(m_matBuff);
+			_libSetImage(IDC_PIC, m_matBuff);
 			SetTimer(1001, 10, nullptr);
 		}
 		break;
@@ -256,4 +261,16 @@ void COGLImageViewerDlg::OnBnClickedBnShape()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 
+}
+
+
+void COGLImageViewerDlg::OnBnClickedButton3()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	CFileDialog fdlg(true);
+	if (fdlg.DoModal() == IDOK)
+	{
+		CStringA strFileName(fdlg.GetPathName());
+		_libOpenImage(IDC_PIC2, strFileName.GetBuffer());
+	}
 }

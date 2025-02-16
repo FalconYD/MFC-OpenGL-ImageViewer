@@ -13,6 +13,13 @@
 // 이 클래스 구현에 대해서는 OGLViewer.cpp를 참조하세요.
 //
 
+struct ST_CONTROLS
+{
+	int nID;
+	CWnd* pWnd;
+	ImageViewer* pImageViewer;
+};
+
 class COGLViewerApp : public CWinApp
 {
 public:
@@ -22,11 +29,18 @@ public:
 public:
 	virtual BOOL InitInstance();
 
+	auto InitGLFW() -> void;
+	auto InitGLEW() -> void;
+
 	DECLARE_MESSAGE_MAP()
 
 public:
-	ImageViewer* mc_pImageViewer = nullptr;
+	std::map<int, ST_CONTROLS> m_mapControls;
 
-	CWnd* m_pParentCwd;
-	int m_ID;
+	auto startthread() -> void;
+	auto stopthread() -> void;
+private:
+	std::thread m_threadUpdate;
+	bool bWork = false;
+	static auto _stdcall THREAD_UPDATE(void* pParam) -> UINT;
 };

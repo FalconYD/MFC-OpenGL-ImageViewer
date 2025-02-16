@@ -11,12 +11,13 @@ private:
 	GLFWwindow* m_window;
 	CRect m_Clientrect;
 public:
-	int Init(CWnd* pParent, UINT nID);
+	auto GetWindowContext() -> GLFWwindow* { return m_window; };
+	int Init(CWnd* pParent, UINT nID, GLFWwindow* sharedcontext = nullptr);
 	int Final();
 	void UpdateDraw();
 	void Add(GLBase* child);
 	void Remove(GLBase* child);
-
+	auto Select() -> void;
 	void OnSize(int width, int height);
 	//void RemoveChild(GLBase* child);
 

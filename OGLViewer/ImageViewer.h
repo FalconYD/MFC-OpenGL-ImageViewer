@@ -27,15 +27,21 @@ private:
 public:
 	ImageViewer();
 	virtual ~ImageViewer();
-	virtual BOOL Create(DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID = NULL);
+	virtual BOOL Create(DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID = NULL, GLFWwindow* sharedwindow = nullptr);
 	afx_msg void OnPaint();
 	afx_msg void OnTimer(UINT_PTR nIDEvent);
+
+	auto GLLoad() -> void;
+	auto SelectGLWindow() -> void;
+	auto GetGLWindow() -> GLFWwindow*;
 
 	void LoadImg(std::string strfilename);
 
 	void SetImg(cv::Mat matSrc);
 
 	void OnSize(int id);
+
+	void UpdateDraw();
 
 	static double cbScale();
 	static cv::Point2d cbWidthHeight();

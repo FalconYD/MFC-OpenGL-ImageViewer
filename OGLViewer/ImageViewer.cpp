@@ -28,8 +28,23 @@ ImageViewer::~ImageViewer()
 {
 	g_pImgView = nullptr;
 }
+auto ImageViewer::SelectGLWindow() -> void
+{
+	if (m_pGL != nullptr)
+	{
+		m_pGL->Select();
+	}
+}
 
-BOOL ImageViewer::Create(DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID)
+auto ImageViewer::GetGLWindow() -> GLFWwindow*
+{
+	if (m_pGL == nullptr) 
+		return nullptr;
+	else
+		return m_pGL->GetWindowContext();
+}
+
+BOOL ImageViewer::Create(DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID, GLFWwindow* sharedwindow)
 {
 	m_pParentWnd = pParentWnd;
 	BOOL result;
@@ -47,37 +62,40 @@ BOOL ImageViewer::Create(DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT
 	if (result != 0)
 	{
 		m_pGL = new GLWindow();
-		m_pGL->Init(pParentWnd, nID);
-		double dHalfWidth = m_pGL->GetClientRect().Width() / 2.f;
-		double dHalfHeight = m_pGL->GetClientRect().Height() / 2.f;
-
-		m_pGLImage = new GLImage();
-		m_pGLImage->Init(m_pGL->GetClientRect().Width(), m_pGL->GetClientRect().Height());
-		m_pGL->Add((GLBase*)m_pGLImage);
-		
-		m_pGLText = new GLFont();
-		m_pGLText->SetFontName("C:\\Windows\\Fonts\\Arial.ttf");
-		m_pGLText->Init(m_pGL->GetClientRect().Width(), m_pGL->GetClientRect().Height());
-		
-		m_pGLText->SetText("POS", "Pos : %.2f, %.2f", static_cast<float>(-dHalfWidth + 5), static_cast<float>(-dHalfHeight + 5 + 40), 0.4f, glm::vec3(1.0, 0.0, 1.0), EN_TEXTSTYLE::EN_BINDING, nullptr, cbPointCb);
-		
-		m_pGLText->SetText("SCALE", "Scale : %.2lf x", static_cast<float>(-dHalfWidth + 5), static_cast<float>(-dHalfHeight + 5 + 20), 0.4f, glm::vec3(1.0, 0.0, 1.0), EN_TEXTSTYLE::EN_BINDING, cbScale);
-		
-		m_pGLText->SetText("WH", "WH : %.2lf, %.2lf", static_cast<float>(-dHalfWidth + 5), static_cast<float>(-dHalfHeight + 5), 0.4f, glm::vec3(1.0, 0.0, 1.0), EN_TEXTSTYLE::EN_BINDING, nullptr, cbWidthHeight);
-		
-		m_pGL->Add((GLBase*)m_pGLText);
-
-		m_pGLShape = new GLShape();
-		m_pGLShape->Init(m_pGL->GetClientRect().Width(), m_pGL->GetClientRect().Height());
-		//m_pGLShape->AddRectangle(-100, -100, 100, 100, glm::vec3(1,0,0), 1);
-		//m_pGLShape->AddCircle(-50, -50, 100, 100, glm::vec3(0,1,0), 1);
-		m_pGL->Add((GLBase*)m_pGLShape);
-		
-		SetTimer(EN_TIMER, 1, nullptr);
+		m_pGL->Init(pParentWnd, nID, sharedwindow);
 	}
 
-
 	return result;
+}
+
+auto ImageViewer::GLLoad() -> void
+{
+	double dHalfWidth = m_pGL->GetClientRect().Width() / 2.f;
+	double dHalfHeight = m_pGL->GetClientRect().Height() / 2.f;
+
+	m_pGLImage = new GLImage();
+	m_pGLImage->Init(m_pGL->GetClientRect().Width(), m_pGL->GetClientRect().Height());
+	m_pGL->Add((GLBase*)m_pGLImage);
+
+	m_pGLText = new GLFont();
+	m_pGLText->SetFontName("C:\\Windows\\Fonts\\Arial.ttf");
+	m_pGLText->Init(m_pGL->GetClientRect().Width(), m_pGL->GetClientRect().Height());
+
+	m_pGLText->SetText("POS", "Pos : %.2f, %.2f", static_cast<float>(-dHalfWidth + 5), static_cast<float>(-dHalfHeight + 5 + 40), 0.4f, glm::vec3(1.0, 0.0, 1.0), EN_TEXTSTYLE::EN_BINDING, nullptr, cbPointCb);
+
+	m_pGLText->SetText("SCALE", "Scale : %.2lf x", static_cast<float>(-dHalfWidth + 5), static_cast<float>(-dHalfHeight + 5 + 20), 0.4f, glm::vec3(1.0, 0.0, 1.0), EN_TEXTSTYLE::EN_BINDING, cbScale);
+
+	m_pGLText->SetText("WH", "WH : %.2lf, %.2lf", static_cast<float>(-dHalfWidth + 5), static_cast<float>(-dHalfHeight + 5), 0.4f, glm::vec3(1.0, 0.0, 1.0), EN_TEXTSTYLE::EN_BINDING, nullptr, cbWidthHeight);
+
+	m_pGL->Add((GLBase*)m_pGLText);
+
+	m_pGLShape = new GLShape();
+	m_pGLShape->Init(m_pGL->GetClientRect().Width(), m_pGL->GetClientRect().Height());
+	//m_pGLShape->AddRectangle(-100, -100, 100, 100, glm::vec3(1,0,0), 1);
+	//m_pGLShape->AddCircle(-50, -50, 100, 100, glm::vec3(0,1,0), 1);
+	m_pGL->Add((GLBase*)m_pGLShape);
+
+	SetTimer(EN_TIMER, 1, nullptr);
 }
 
 void ImageViewer::OnPaint()
@@ -106,6 +124,11 @@ void ImageViewer::OnTimer(UINT_PTR nIDEvent)
 		break;
 	}
 	//CWnd::OnTimer(nIDEvent);
+}
+
+void ImageViewer::UpdateDraw()
+{
+	m_pGL->UpdateDraw();
 }
 
 void ImageViewer::LoadImg(std::string strfilename)

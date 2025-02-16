@@ -14,23 +14,28 @@ GLWindow::~GLWindow()
 	gWin = nullptr;
 }
 
-int GLWindow::Init(CWnd* pParent, UINT nID)
+auto GLWindow::Select() -> void
+{
+	glfwMakeContextCurrent(m_window);
+}
+
+int GLWindow::Init(CWnd* pParent, UINT nID, GLFWwindow* sharedcontext)
 {
 	m_pParent = pParent;
-	if (!glfwInit())
-		return -1;
+	//if (!glfwInit())
+	//	return -1;
 
-	//glfwDefaultWindowHints();
-	glfwWindowHint(GLFW_SAMPLES, 4);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-	//glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // To make MacOS happy; should not be needed
-	//glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-	glfwWindowHint(GLFW_DECORATED, GLFW_FALSE);
-	//glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
+	////glfwDefaultWindowHints();
+	//glfwWindowHint(GLFW_SAMPLES, 4);
+	//glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+	//glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+	////glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // To make MacOS happy; should not be needed
+	////glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+	//glfwWindowHint(GLFW_DECORATED, GLFW_FALSE);
+	////glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
 
 	m_pParent->GetDlgItem(nID)->GetClientRect(&m_Clientrect);
-	m_window = glfwCreateWindow(m_Clientrect.Width(), m_Clientrect.Height(), "GLWindow", NULL, NULL);
+	m_window = glfwCreateWindow(m_Clientrect.Width(), m_Clientrect.Height(), std::format("GLWindow{}", nID).c_str(), NULL, sharedcontext);
 	glfwSetCursorPosCallback(m_window, &MouseMoveCallBack);
 	glfwSetMouseButtonCallback(m_window, &MouseButtonCallBack);
 	glfwSetScrollCallback(m_window, &MouseScrollCallBack);
@@ -49,11 +54,11 @@ int GLWindow::Init(CWnd* pParent, UINT nID)
 
 	glfwMakeContextCurrent(m_window);
 	// Initialize GLEW
-	glewExperimental = true; // Needed for core profile
-	GLenum en = glewInit();
-	if (en != GLEW_OK) {
-		return -1;
-	}
+	//glewExperimental = true; // Needed for core profile
+	//GLenum en = glewInit();
+	//if (en != GLEW_OK) {
+	//	return -1;
+	//}
 	glfwSetInputMode(m_window, GLFW_STICKY_KEYS, GL_TRUE);
 
 	//glEnable(GL_DEPTH_TEST);
@@ -73,21 +78,26 @@ int GLWindow::Final()
 	base.clear();
 	glfwDestroyWindow(m_window);
 	glfwTerminate();
-	
+
 	return 0;
 }
 
 void GLWindow::UpdateDraw()
 {
-	glClearColor(0.0f, 0.0f, 0.4f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	for (int i = 0; i < base.size(); i++)
+	//if (glfwGetCurrentContext() != m_window)
 	{
-		base[i]->Draw();
-	}
+		glfwMakeContextCurrent(m_window);
 
-	glfwSwapBuffers(m_window);
+		glClearColor(0.0f, 0.0f, 0.4f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		for (int i = 0; i < base.size(); i++)
+		{
+			base[i]->Draw();
+		}
+
+		glfwSwapBuffers(m_window);
+	}
 	glfwPollEvents();
 }
 
@@ -151,7 +161,7 @@ void GLWindow::OnSize(int width, int height)
 {
 	if (gWin == nullptr) return;
 
-	
+
 	for (int i = 0; i < gWin->base.size(); i++)
 	{
 		gWin->base[i]->OnSize(width, height);
