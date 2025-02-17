@@ -37,10 +37,7 @@ public:
 public:
 	std::map<int, ST_CONTROLS> m_mapControls;
 
-	auto startthread() -> void;
-	auto stopthread() -> void;
 private:
 	std::thread m_threadUpdate;
 	bool bWork = false;
-	static auto _stdcall THREAD_UPDATE(void* pParam) -> UINT;
 };

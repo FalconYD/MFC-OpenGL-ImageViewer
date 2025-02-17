@@ -13,7 +13,7 @@ private:
 	CRect m_Clientrect;
 public:
 	auto GetWindowContext() -> GLFWwindow* { return m_window; };
-	int Init(CWnd* pParent, UINT nID);
+	int Init(CWnd* pParent, UINT nID, CRect rect);
 	int Final();
 	void UpdateDraw(int id);
 	void Add(GLBase* child);

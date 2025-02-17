@@ -59,8 +59,15 @@ public:
 	virtual void OnSize(int width, int height);
 	double GetFrameRate() const;
 	cv::Point2d GetNowPoint();
+	cv::Point2d GetNowPoint2();
 	cv::Point2d GetImageSize();
+	cv::Vec3b GetPixel(int x, int y);
 	double GetScale();
+	auto ScaleFit() -> void;
+	auto Scale1x() -> void;
+	auto ScaleZoomIn() -> void;
+	auto ScaleZoomOut() -> void;
+	auto ScaleZoom(int posy) -> void;
 
 	void SetImage(cv::Mat matSrc);
 

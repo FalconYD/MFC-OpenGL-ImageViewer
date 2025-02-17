@@ -264,20 +264,22 @@ void GLImage::MouseButton(GLFWwindow* win, int button, int action, int mods)
 		}
 		break;
 		case 1:
-			m_move = glm::vec3(0, 0, 0);
-			m_translate = glm::translate(glm::mat4(), m_move);
-
-			m_zoom = glm::vec3(1, 1, 1);
-			m_scale = glm::scale(m_zoom);
+			Scale1x();
+			//m_move = glm::vec3(0, 0, 0);
+			//m_translate = glm::translate(glm::mat4(), m_move);
+			//
+			//m_zoom = glm::vec3(1, 1, 1);
+			//m_scale = glm::scale(m_zoom);
 			break;
 		case 2:
 		{
-			m_move = glm::vec3(0, 0, 0);
-			m_translate = glm::translate(glm::mat4(), m_move);
-
-			float fitscale = getfitscale();
-			m_zoom = glm::vec3(fitscale, fitscale, 1);
-			m_scale = glm::scale(m_zoom);
+			ScaleFit();
+			//m_move = glm::vec3(0, 0, 0);
+			//m_translate = glm::translate(glm::mat4(), m_move);
+			//
+			//float fitscale = getfitscale();
+			//m_zoom = glm::vec3(fitscale, fitscale, 1);
+			//m_scale = glm::scale(m_zoom);
 		}
 		break;
 		}
@@ -292,23 +294,24 @@ void GLImage::MouseScroll(GLFWwindow* win, double xpos, double ypos)
 {
 	if (ypos != 0.0f)
 	{
-		float prevx = getimgposx(m_movePoint.x);
-		float prevy = getimgposy(m_movePoint.y);
-		if (ypos > 0)
-		{
-			m_zoom *= 1 / 0.9;
-		}
-		else
-		{
-			m_zoom *= 0.9;
-		}
-		m_scale = glm::scale(m_zoom);
-
-		float currx = getimgposx(m_movePoint.x);
-		float curry = getimgposy(m_movePoint.y);
-		m_move.x += (currx - prevx) * m_zoom.x;
-		m_move.y += (curry - prevy) * m_zoom.y;
-		m_translate = glm::translate(glm::mat4(), m_move);
+		ScaleZoom(ypos);
+		//float prevx = getimgposx(m_movePoint.x);
+		//float prevy = getimgposy(m_movePoint.y);
+		//if (ypos > 0)
+		//{
+		//	m_zoom *= 1 / 0.9;
+		//}
+		//else
+		//{
+		//	m_zoom *= 0.9;
+		//}
+		//m_scale = glm::scale(m_zoom);
+		//
+		//float currx = getimgposx(m_movePoint.x);
+		//float curry = getimgposy(m_movePoint.y);
+		//m_move.x += (currx - prevx) * m_zoom.x;
+		//m_move.y += (curry - prevy) * m_zoom.y;
+		//m_translate = glm::translate(glm::mat4(), m_move);
 	}
 }
 
@@ -321,6 +324,51 @@ void GLImage::KeyboardCallback(GLFWwindow* win, int key, int scancode, int actio
 	if (action == GLFW_RELEASE) {
 
 	}
+}
+auto GLImage::ScaleZoom(int posy) ->void
+{
+	float prevx = getimgposx(m_movePoint.x);
+	float prevy = getimgposy(m_movePoint.y);
+	if (posy > 0)
+	{
+		m_zoom *= 1 / 0.9;
+	}
+	else
+	{
+		m_zoom *= 0.9;
+	}
+	m_scale = glm::scale(m_zoom);
+
+	float currx = getimgposx(m_movePoint.x);
+	float curry = getimgposy(m_movePoint.y);
+	m_move.x += (currx - prevx) * m_zoom.x;
+	m_move.y += (curry - prevy) * m_zoom.y;
+	m_translate = glm::translate(glm::mat4(), m_move);
+}
+auto GLImage::ScaleFit() -> void
+{
+	m_move = glm::vec3(0, 0, 0);
+	m_translate = glm::translate(glm::mat4(), m_move);
+
+	float fitscale = getfitscale();
+	m_zoom = glm::vec3(fitscale, fitscale, 1);
+	m_scale = glm::scale(m_zoom);
+}
+auto GLImage::Scale1x() -> void
+{
+	m_move = glm::vec3(0, 0, 0);
+	m_translate = glm::translate(glm::mat4(), m_move);
+
+	m_zoom = glm::vec3(1, 1, 1);
+	m_scale = glm::scale(m_zoom);
+}
+auto GLImage::ScaleZoomIn() -> void
+{
+	ScaleZoom(1);
+}
+auto GLImage::ScaleZoomOut() -> void
+{
+	ScaleZoom(-1);
 }
 
 float GLImage::getimgposx(float x)
@@ -395,6 +443,11 @@ cv::Point2d GLImage::GetNowPoint()
 	return cv::Point2d(getimgposx(m_movePoint.x), getimgposy(m_movePoint.y));
 }
 
+cv::Point2d GLImage::GetNowPoint2()
+{
+	return cv::Point2d(m_movePoint.x / m_zoom.x, m_movePoint.y / m_zoom.y);
+}
+
 cv::Point2d GLImage::GetImageSize()
 {
 	return cv::Point2d(m_matImg.cols, m_matImg.rows);
@@ -429,5 +482,25 @@ void GLImage::SetImage(cv::Mat matSrc)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glBindTexture(GL_TEXTURE_2D, 0);
+}
 
+cv::Vec3b GLImage::GetPixel(int x, int y)
+{
+	cv::Vec3b rtn{};
+	if (!m_matImg.empty() && m_matImg.cols > x && m_matImg.rows > y && x >= 0 && y >= 0)
+	{
+		switch (m_matImg.channels())
+		{
+		case 1:
+			rtn[0] = m_matImg.at<uchar>(y, x);
+			rtn[1] = m_matImg.at<uchar>(y, x);
+			rtn[2] = m_matImg.at<uchar>(y, x);
+			break;
+		case 3:
+			rtn = m_matImg.at<cv::Vec3b>(y, x);
+			break;
+		}
+	}
+
+	return rtn;
 }

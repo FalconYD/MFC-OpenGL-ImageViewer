@@ -22,12 +22,32 @@ private:
 
 	CRect m_clientRect;
 
+	const int BTN_HEIGHT = 70;
+	const int INFO_HEIGHT = 20;
+
+	CRect m_rectInfoView;
+	CRect m_rectBtnCtrl;
+	CRect m_rectImageView;
+
+	CButton* m_bnOpen;
+	CButton* m_bnSave;
+	CButton* m_bn1X;
+	CButton* m_bnFit;
+	CButton* m_bnIn;
+	CButton* m_bnOut;
+
+	CStatic* m_stPos;
+	CStatic* m_stColor;
+	CStatic* m_stScale;
+	CStatic* m_stImgInfo;
+
 	static ImageViewer* g_pImgView;
 	bool m_bDestroy;
 public:
 	ImageViewer();
 	virtual ~ImageViewer();
 	virtual BOOL Create(DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID = NULL);
+	auto DrawCtrl() -> void;
 	afx_msg void OnPaint();
 	afx_msg void OnTimer(UINT_PTR nIDEvent);
 
@@ -49,4 +69,10 @@ public:
 	static cv::Point2d cbPointCb();
 	afx_msg void OnDestroy();
 	afx_msg void OnSize(UINT nType, int cx, int cy);
+	afx_msg void OnClickOpen();
+	afx_msg void OnClickSave();
+	afx_msg void OnClick1x();
+	afx_msg void OnClickFit();
+	afx_msg void OnClickIn();
+	afx_msg void OnClickOut();
 };

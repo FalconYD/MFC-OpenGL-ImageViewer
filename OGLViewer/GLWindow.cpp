@@ -19,7 +19,7 @@ auto GLWindow::Select() -> void
 	glfwMakeContextCurrent(m_window);
 }
 
-int GLWindow::Init(CWnd* pParent, UINT nID)
+int GLWindow::Init(CWnd* pParent, UINT nID, CRect rect)
 {
 	m_nID = nID;
 	m_pParent = pParent;
@@ -35,9 +35,10 @@ int GLWindow::Init(CWnd* pParent, UINT nID)
 	glfwWindowHint(GLFW_DECORATED, GLFW_FALSE);
 	//glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
 
-	m_pParent->GetDlgItem(nID)->GetClientRect(&m_Clientrect);
+	//m_pParent->GetDlgItem(nID)->GetClientRect(&m_Clientrect);
+	m_Clientrect = rect;
 	//m_window = glfwCreateWindow(m_Clientrect.Width(), m_Clientrect.Height(), std::format("GLWindow{}", nID).c_str(), NULL, sharedcontext);
-	m_window = glfwCreateWindow(m_Clientrect.Width(), m_Clientrect.Height(), std::format("GLWindow{}", nID).c_str(), NULL, NULL);
+	m_window = glfwCreateWindow(rect.Width(), rect.Height(), std::format("GLWindow{}", nID).c_str(), NULL, NULL);
 	glfwSetCursorPosCallback(m_window, &MouseMoveCallBack);
 	glfwSetMouseButtonCallback(m_window, &MouseButtonCallBack);
 	glfwSetScrollCallback(m_window, &MouseScrollCallBack);
@@ -109,7 +110,7 @@ void GLWindow::UpdateDraw(int id)
 			base[i]->Draw();
 		}
 		glfwSwapBuffers(m_window);
-		glfwPollEvents();
+		//glfwPollEvents();
 	}
 	//glfwMakeContextCurrent(nullptr);
 }

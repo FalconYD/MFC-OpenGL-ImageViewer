@@ -6,6 +6,15 @@
 
 #include "OGLViewer.h"
 
+constexpr int C_ID_BN_OPEN = 2001;
+constexpr int C_ID_BN_SAVE = 2002;
+constexpr int C_ID_BN_FIT = 2003;
+constexpr int C_ID_BN_1X = 2004;
+constexpr int C_ID_BN_IN = 2005;
+constexpr int C_ID_BN_OUT = 2006;
+constexpr int C_ID_BN_RULER = 2007;
+constexpr int C_ID_BN_DRAWMODE = 2008;
+
 extern COGLViewerApp theApp;
 ImageViewer* ImageViewer::g_pImgView = nullptr;
 
@@ -14,6 +23,12 @@ BEGIN_MESSAGE_MAP(ImageViewer, CWnd)
 	ON_WM_TIMER()
 	ON_WM_DESTROY()
 	ON_WM_SIZE()
+	ON_BN_CLICKED(C_ID_BN_OPEN, OnClickOpen)
+	ON_BN_CLICKED(C_ID_BN_SAVE, OnClickSave)
+	ON_BN_CLICKED(C_ID_BN_FIT, OnClickFit)
+	ON_BN_CLICKED(C_ID_BN_1X, OnClick1x)
+	ON_BN_CLICKED(C_ID_BN_IN, OnClickIn)
+	ON_BN_CLICKED(C_ID_BN_OUT, OnClickOut)
 END_MESSAGE_MAP()
 
 ImageViewer::ImageViewer()
@@ -47,13 +62,95 @@ auto ImageViewer::GetGLWindow() -> GLFWwindow*
 		return m_pGL->GetWindowContext();
 }
 
+auto ImageViewer::DrawCtrl()->void
+{
+	/** 컨트롤 배치 하부로 이동. Taeroo-kgseon 2024.12.31 17:48:48 */
+	CRect rectTemp;
+	int nCtrlOffset;
+	CRect client;
+	client = m_clientRect;
+	client.right -= client.left;
+	client.bottom -= client.top;
+	client.left = 0;
+	client.top = 0;
+
+	m_rectInfoView = client;
+	m_rectInfoView.top = client.bottom - INFO_HEIGHT;
+	m_rectInfoView.bottom = client.bottom;
+
+	m_rectBtnCtrl = client;
+	m_rectBtnCtrl.top = m_rectInfoView.top - BTN_HEIGHT;
+	m_rectBtnCtrl.bottom = m_rectInfoView.top;
+
+	m_rectImageView = client;
+	m_rectImageView.bottom = m_rectBtnCtrl.top;
+
+	//rectTemp
+	nCtrlOffset = static_cast<int>(m_rectBtnCtrl.Width() / 6);
+	//nCtrlOffset = m_rectBtnCtrl.Width() / 7;
+	rectTemp = m_rectBtnCtrl;
+	rectTemp.right = rectTemp.left + nCtrlOffset;
+	m_bnOpen = new CButton();
+	m_bnOpen->Create(_T("Open"), WS_CHILD | WS_VISIBLE | SS_CENTER, rectTemp, this, C_ID_BN_OPEN);
+
+	rectTemp.left = rectTemp.right;
+	rectTemp.right = rectTemp.left + nCtrlOffset;
+	m_bnSave = new CButton();
+	m_bnSave->Create(_T("Save"), WS_CHILD | WS_VISIBLE | SS_CENTER, rectTemp, this, C_ID_BN_SAVE);
+
+	rectTemp.left = rectTemp.right;
+	rectTemp.right = rectTemp.left + nCtrlOffset;
+	m_bn1X = new CButton();
+	m_bn1X->Create(_T("1X"), WS_CHILD | WS_VISIBLE | SS_CENTER, rectTemp, this, C_ID_BN_1X);
+
+	rectTemp.left = rectTemp.right;
+	rectTemp.right = rectTemp.left + nCtrlOffset;
+	m_bnFit = new CButton();
+	m_bnFit->Create(_T("Fit"), WS_CHILD | WS_VISIBLE | SS_CENTER, rectTemp, this, C_ID_BN_FIT);
+
+	rectTemp.left = rectTemp.right;
+	rectTemp.right = rectTemp.left + nCtrlOffset;
+	m_bnIn = new CButton();
+	m_bnIn->Create(_T("In"), WS_CHILD | WS_VISIBLE | SS_CENTER, rectTemp, this, C_ID_BN_IN);
+
+	rectTemp.left = rectTemp.right;
+	rectTemp.right = rectTemp.left + nCtrlOffset;
+	m_bnOut = new CButton();
+	m_bnOut->Create(_T("Out"), WS_CHILD | WS_VISIBLE | SS_CENTER, rectTemp, this, C_ID_BN_OUT);
+
+
+	nCtrlOffset = m_rectInfoView.Width() / 4;
+	rectTemp = m_rectInfoView;
+	rectTemp.right = rectTemp.left + nCtrlOffset;
+	m_stPos = new CStatic();
+	m_stPos->Create(_T("X:0000, Y:0000"), WS_CHILD | WS_VISIBLE | WS_BORDER | SS_CENTER, rectTemp, this);
+
+	rectTemp.left = rectTemp.right;
+	rectTemp.right = rectTemp.left + nCtrlOffset + 20;
+	m_stColor = new CStatic();
+	m_stColor->Create(_T("R:000, G:000, B:000"), WS_CHILD | WS_VISIBLE | WS_BORDER | SS_CENTER, rectTemp, this);
+
+	rectTemp.left = rectTemp.right;
+	rectTemp.right = rectTemp.left + nCtrlOffset - 20;
+	m_stScale = new CStatic();
+	m_stScale->Create(_T("Scale:x1.00"), WS_CHILD | WS_VISIBLE | WS_BORDER | SS_CENTER, rectTemp, this);
+
+	rectTemp.left = rectTemp.right;
+	//rectTemp.right = rectTemp.left + nCtrlOffset;
+	rectTemp.right = m_rectBtnCtrl.right;
+	m_stImgInfo = new CStatic();
+	m_stImgInfo->Create(_T("W:0 H:0"), WS_CHILD | WS_VISIBLE | WS_BORDER | SS_CENTER, rectTemp, this);
+
+}
+
 BOOL ImageViewer::Create(DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID)
 {
 	m_pParentWnd = pParentWnd;
+	m_nID = nID;
 	BOOL result;
 	static CString className = AfxRegisterWndClass(CS_DBLCLKS | CS_HREDRAW | CS_VREDRAW, AfxGetApp()->LoadStandardCursor(IDC_ARROW));
 
-	m_clientRect = CRect(rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top);
+	m_clientRect = rect;
 
 	result = CWnd::CreateEx(/*WS_EX_CLIENTEDGE*/ // strong (default) border
 		WS_EX_STATICEDGE,	// lightweight border
@@ -61,11 +158,11 @@ BOOL ImageViewer::Create(DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT
 		m_clientRect.left, m_clientRect.top, m_clientRect.Width(), m_clientRect.Height(),
 		pParentWnd->GetSafeHwnd(), (HMENU)(UINT_PTR)nID);
 
-	m_nID = nID;
 	if (result != 0)
 	{
+		DrawCtrl();
 		m_pGL = new GLWindow();
-		m_pGL->Init(pParentWnd, nID);
+		m_pGL->Init(pParentWnd, nID, m_rectImageView);
 
 		//double dHalfWidth = m_pGL->GetClientRect().Width() / 2.f;
 		//double dHalfHeight = m_pGL->GetClientRect().Height() / 2.f;
@@ -85,7 +182,7 @@ BOOL ImageViewer::Create(DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT
 		//m_pGLText->SetText("SCALE", "Scale : %.2lf x", static_cast<float>(-dHalfWidth + 5), static_cast<float>(-dHalfHeight + 5 + 20), 0.4f, glm::vec3(1.0, 0.0, 1.0), EN_TEXTSTYLE::EN_BINDING, cbScale);
 		//
 		//m_pGLText->SetText("WH", "WH : %.2lf, %.2lf", static_cast<float>(-dHalfWidth + 5), static_cast<float>(-dHalfHeight + 5), 0.4f, glm::vec3(1.0, 0.0, 1.0), EN_TEXTSTYLE::EN_BINDING, nullptr, cbWidthHeight);
-		
+
 		//m_pGL->Add((GLBase*)m_pGLText);
 
 
@@ -100,6 +197,7 @@ BOOL ImageViewer::Create(DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT
 
 	return result;
 }
+
 
 auto ImageViewer::GLLoad() -> void
 {
@@ -154,9 +252,13 @@ void ImageViewer::OnTimer(UINT_PTR nIDEvent)
 		if (!m_bDestroy)
 		{
 			m_pGL->UpdateDraw(m_nID);
-			//SetTimer(EN_TIMER, 10, nullptr);
 
-			//m_pGLImage->Draw();
+			m_stImgInfo->SetWindowText(std::format(_T("W:{} H:{}"), m_pGLImage->GetImageWidth(), m_pGLImage->GetImageHeight()).c_str());
+			m_stScale->SetWindowText(std::format(_T("Scale : {:.2f}x"), m_pGLImage->GetScale()).c_str());
+			auto pixel = m_pGLImage->GetPixel(m_pGLImage->GetNowPoint().x, m_pGLImage->GetNowPoint().y);
+			m_stColor->SetWindowText(std::format(_T("R: {} G: {} B: {}"), pixel[2], pixel[1], pixel[0]).c_str());
+			m_stPos->SetWindowText(std::format(_T("X: {:.1f}, Y: {:.1f}"), m_pGLImage->GetNowPoint().x, m_pGLImage->GetNowPoint().y).c_str());
+			//glfwPollEvents();
 		}
 		break;
 	}
@@ -249,4 +351,37 @@ void ImageViewer::OnSize(int id)
 void ImageViewer::SetImg(cv::Mat matSrc)
 {
 	m_pGLImage->SetImage(matSrc);
+}
+
+void ImageViewer::OnClickOpen()
+{
+	CFileDialog dlg(TRUE, _T("Image File | *.bmp"));
+	if (dlg.DoModal() == TRUE)
+	{
+		m_pGLImage->LoadImg(CT2A(dlg.GetPathName()).m_psz);
+	}
+}
+void ImageViewer::OnClickSave()
+{
+	CFileDialog dlg(FALSE, _T("Image File | *.bmp"));
+	if (dlg.DoModal() == TRUE)
+	{
+		//SaveImage(dlg.GetPathName());
+	}
+}
+void ImageViewer::OnClick1x()
+{
+	m_pGLImage->Scale1x();
+}
+void ImageViewer::OnClickFit()
+{
+	m_pGLImage->ScaleFit();
+}
+void ImageViewer::OnClickIn()
+{
+	m_pGLImage->ScaleZoomIn();
+}
+void ImageViewer::OnClickOut()
+{
+	m_pGLImage->ScaleZoomOut();
 }

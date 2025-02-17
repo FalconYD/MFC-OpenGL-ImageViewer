@@ -54,7 +54,6 @@ COGLViewerApp::COGLViewerApp()
 
 COGLViewerApp::~COGLViewerApp()
 {
-	stopthread();
 	for (auto& it : m_mapControls)
 	{
 		if (it.second.pImageViewer != nullptr)
@@ -116,39 +115,6 @@ auto COGLViewerApp::InitGLEW() -> void
 	}
 }
 
-auto COGLViewerApp::startthread() -> void
-{
-	bWork = true;
-	m_threadUpdate = std::thread(THREAD_UPDATE, this);
-}
-
-auto COGLViewerApp::stopthread() -> void 
-{
-	bWork = false;
-	m_threadUpdate.join();
-}
-
-auto COGLViewerApp::THREAD_UPDATE(void* pParam)->UINT
-{
-
-	while (theApp.bWork)
-	{
-		for (auto& it : theApp.m_mapControls)
-		{
-			if (it.second.pImageViewer != nullptr)
-			{
-				it.second.pImageViewer->SelectGLWindow();
-				it.second.pImageViewer->UpdateDraw();
-			}
-		}
-		
-		glfwPollEvents();
-		Sleep(10);
-
-	}
-	return 0;
-}
-
 DLLTYPE void _libAddCtrl(int id, CWnd* parentWnd)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
@@ -184,32 +150,18 @@ DLLTYPE void _libOpenImage(int id, const char* strpath)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	theApp.m_mapControls[id].pImageViewer->LoadImg(strpath);
-	//theApp.mc_pImageViewer->LoadImg(strpath);
 }
-//DLLTYPE void _libFinalCtrl()
-//{
-//	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-//	theApp.mc_pImageViewer->DestroyWindow();
-//}
 
 DLLTYPE void _libOnSize(int id, UINT Type)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	//if (theApp.m_pParentCwd == nullptr) return;
-	//RECT rect;
-	//theApp.m_pParentCwd->GetDlgItem(theApp.m_ID)->GetWindowRect(&rect);
-	//theApp.m_pParentCwd->ScreenToClient(&rect);
-
-	//theApp.mc_pImageViewer->OnSize(theApp.m_ID);
 	if (!theApp.m_mapControls.empty() && theApp.m_mapControls[id].pWnd != nullptr)
 		theApp.m_mapControls[id].pImageViewer->OnSize(Type);
-	//theApp.mc_pImageViewer->OnSize(Type, rect.right-rect.left, rect.bottom - rect.top);
 }
 
 DLLTYPE void _libSetImage(int id, cv::Mat matImg)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	//theApp.mc_pImageViewer->SetImg(matImg);
 	theApp.m_mapControls[id].pImageViewer->SetImg(matImg);
 }
