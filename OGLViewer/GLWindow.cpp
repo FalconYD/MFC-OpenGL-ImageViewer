@@ -19,23 +19,25 @@ auto GLWindow::Select() -> void
 	glfwMakeContextCurrent(m_window);
 }
 
-int GLWindow::Init(CWnd* pParent, UINT nID, GLFWwindow* sharedcontext)
+int GLWindow::Init(CWnd* pParent, UINT nID)
 {
+	m_nID = nID;
 	m_pParent = pParent;
 	//if (!glfwInit())
 	//	return -1;
 
-	////glfwDefaultWindowHints();
-	//glfwWindowHint(GLFW_SAMPLES, 4);
-	//glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-	//glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-	////glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // To make MacOS happy; should not be needed
-	////glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-	//glfwWindowHint(GLFW_DECORATED, GLFW_FALSE);
-	////glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
+	//glfwDefaultWindowHints();
+	glfwWindowHint(GLFW_SAMPLES, 4);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+	//glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // To make MacOS happy; should not be needed
+	//glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+	glfwWindowHint(GLFW_DECORATED, GLFW_FALSE);
+	//glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
 
 	m_pParent->GetDlgItem(nID)->GetClientRect(&m_Clientrect);
-	m_window = glfwCreateWindow(m_Clientrect.Width(), m_Clientrect.Height(), std::format("GLWindow{}", nID).c_str(), NULL, sharedcontext);
+	//m_window = glfwCreateWindow(m_Clientrect.Width(), m_Clientrect.Height(), std::format("GLWindow{}", nID).c_str(), NULL, sharedcontext);
+	m_window = glfwCreateWindow(m_Clientrect.Width(), m_Clientrect.Height(), std::format("GLWindow{}", nID).c_str(), NULL, NULL);
 	glfwSetCursorPosCallback(m_window, &MouseMoveCallBack);
 	glfwSetMouseButtonCallback(m_window, &MouseButtonCallBack);
 	glfwSetScrollCallback(m_window, &MouseScrollCallBack);
@@ -50,7 +52,6 @@ int GLWindow::Init(CWnd* pParent, UINT nID, GLFWwindow* sharedcontext)
 	SetWindowLong(hwNative, GWL_STYLE, style);
 
 	::ShowWindow(hwNative, SW_SHOW);
-	//glfwSetWindowUserPointer(window, GetDlgItem(IDC_OPENGL));
 
 	glfwMakeContextCurrent(m_window);
 	// Initialize GLEW
@@ -60,12 +61,13 @@ int GLWindow::Init(CWnd* pParent, UINT nID, GLFWwindow* sharedcontext)
 	//	return -1;
 	//}
 	glfwSetInputMode(m_window, GLFW_STICKY_KEYS, GL_TRUE);
-
+	glfwSetWindowUserPointer(m_window, this);
 	//glEnable(GL_DEPTH_TEST);
 	//glDepthFunc(GL_LESS);
 	//glDisable(GL_DEPTH_TEST);
 
 	glfwSwapInterval(1); // VSync
+	//glfwMakeContextCurrent(nullptr);
 	return 0;
 }
 
@@ -82,23 +84,34 @@ int GLWindow::Final()
 	return 0;
 }
 
-void GLWindow::UpdateDraw()
+void GLWindow::UpdateDraw(int id)
 {
-	//if (glfwGetCurrentContext() != m_window)
+	//if (m_nID == 1000) glViewport(0, 0, m_Clientrect.Width(), m_Clientrect.Height());
+	//else glViewport(100, 0, m_Clientrect.Width(), m_Clientrect.Height());
+
+	//int w, h;
+	//glfwGetFramebufferSize(m_window, &w, &h);
+	glfwMakeContextCurrent(m_window);
+
+	//Sleep(10);
+	if (glfwGetCurrentContext() == m_window)
 	{
-		glfwMakeContextCurrent(m_window);
-
-		glClearColor(0.0f, 0.0f, 0.4f, 1.0f);
+		//OutputDebugStringA(std::format("{:x} {}\n", (unsigned long long)m_window, id).c_str());
+		if (m_nID == 1000)
+			glClearColor(0.0f, 0.0f, 0.4f, 1.0f);
+		else
+			glClearColor(0.4f, 0.0f, 0.0f, 1.0f);
+		
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+		
 		for (int i = 0; i < base.size(); i++)
 		{
 			base[i]->Draw();
 		}
-
 		glfwSwapBuffers(m_window);
+		glfwPollEvents();
 	}
-	glfwPollEvents();
+	//glfwMakeContextCurrent(nullptr);
 }
 
 
@@ -123,50 +136,55 @@ void GLWindow::Remove(GLBase* child)
 
 void GLWindow::MouseButtonCallBack(GLFWwindow* win, int button, int action, int mods)
 {
+	auto ptr = static_cast<GLWindow*>(glfwGetWindowUserPointer(win));
 	for (int i = 0; i < gWin->base.size(); i++)
 	{
-		gWin->base[i]->MouseButton(win, button, action, mods);
+		ptr->base[i]->MouseButton(win, button, action, mods);
 	}
 	//gWin->UpdateDraw();
 }
 
 void GLWindow::MouseMoveCallBack(GLFWwindow* win, double xpos, double ypos)
 {
+	auto ptr = static_cast<GLWindow*>(glfwGetWindowUserPointer(win));
 	for (int i = 0; i < gWin->base.size(); i++)
 	{
-		gWin->base[i]->MouseMove(win, xpos, ypos);
+		ptr->base[i]->MouseMove(win, xpos, ypos);
 	}
 	//gWin->UpdateDraw();
 }
 
 void GLWindow::MouseScrollCallBack(GLFWwindow* win, double xpos, double ypos)
 {
+	auto ptr = static_cast<GLWindow*>(glfwGetWindowUserPointer(win));
 	for (int i = 0; i < gWin->base.size(); i++)
 	{
-		gWin->base[i]->MouseScroll(win, xpos, ypos);
+		ptr->base[i]->MouseScroll(win, xpos, ypos);
 	}
 	//gWin->UpdateDraw();
 }
 
 void GLWindow::KeyboardCallBack(GLFWwindow* win, int key, int scancode, int action, int mods)
 {
+	auto ptr = static_cast<GLWindow*>(glfwGetWindowUserPointer(win));
 	for (int i = 0; i < gWin->base.size(); i++)
 	{
-		gWin->base[i]->KeyboardCallback(win, key, scancode, action, mods);
+		ptr->base[i]->KeyboardCallback(win, key, scancode, action, mods);
 	}
 	//gWin->UpdateDraw();
 }
 
 void GLWindow::OnSize(int width, int height)
 {
-	if (gWin == nullptr) return;
+
+	//if (gWin == nullptr) return;
 
 
 	for (int i = 0; i < gWin->base.size(); i++)
 	{
-		gWin->base[i]->OnSize(width, height);
+		base[i]->OnSize(width, height);
 	}
-
+	
 	glfwSetWindowSize(m_window, width, height);
 	glViewport(0, 0, width, height);
 }

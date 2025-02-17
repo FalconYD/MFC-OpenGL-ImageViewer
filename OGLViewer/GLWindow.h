@@ -8,13 +8,14 @@ private:
 	std::vector<GLBase*> base;
 	CWnd* m_pParent;
 
+	int m_nID;
 	GLFWwindow* m_window;
 	CRect m_Clientrect;
 public:
 	auto GetWindowContext() -> GLFWwindow* { return m_window; };
-	int Init(CWnd* pParent, UINT nID, GLFWwindow* sharedcontext = nullptr);
+	int Init(CWnd* pParent, UINT nID);
 	int Final();
-	void UpdateDraw();
+	void UpdateDraw(int id);
 	void Add(GLBase* child);
 	void Remove(GLBase* child);
 	auto Select() -> void;

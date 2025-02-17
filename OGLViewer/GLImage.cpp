@@ -1,8 +1,9 @@
 #include "pch.h"
 #include "GLImage.h"
 
-GLImage::GLImage()
+GLImage::GLImage(GLWindow* parent)
 {
+	m_parent = parent;
 	m_zoom = glm::vec3(1.f, 1.f, 1.f);
 
 	m_vecUv2.clear();
@@ -31,13 +32,14 @@ GLImage::~GLImage()
 	m_vecUv2.clear();
 }
 
-void GLImage::Init(int clientwidth, int clientheight)
+void GLImage::Init(int clientwidth, int clientheight, int id)
 {
+	m_nID = id;
 	m_clientwidth = clientwidth;
 	m_clientheight = clientheight;
 	std::string VertexShaderCode =
 		R"(
-#version 330 core
+#version 460 core
 // Input vertex data, different for all executions of this shader.
 layout(location = 0) in vec3 vertexPosition_modelspace;
 layout(location = 1) in vec2 vertexUV;
@@ -53,7 +55,7 @@ void main()
 	// Read the Fragment Shader code from the file
 	std::string FragmentShaderCode =
 		R"(
-#version 330 core
+#version 460 core
 in vec2 UV;
 out vec3 color;
 uniform sampler2D myTextureSampler;
@@ -62,15 +64,20 @@ void main() {
 }
 	)";
 
-
+	//VertexShaderCode = GLUtil::Replace(VertexShaderCode, "MVP", std::format("MVP{}", m_nID));
+	//VertexShaderCode = GLUtil::Replace(VertexShaderCode, "UV", std::format("UV{}", m_nID));
+	//VertexShaderCode = GLUtil::Replace(VertexShaderCode, "vertexPosition_modelspace", std::format("vertexPosition_modelspace{}", m_nID));
+	//VertexShaderCode = GLUtil::Replace(VertexShaderCode, "location = 0)", std::format("location = {})", m_nID - 1000));
+	//VertexShaderCode = GLUtil::Replace(VertexShaderCode, "location = 1)", std::format("location = {})", (m_nID - 1000) + 1));
+	//
+	//FragmentShaderCode = GLUtil::Replace(FragmentShaderCode, "UV", std::format("UV{}", m_nID));
+	//FragmentShaderCode = GLUtil::Replace(FragmentShaderCode, "myTextureSampler", std::format("myTextureSampler{}", m_nID));
 	
-
 	//glPixelStorei(GL_PACK_ALIGNMENT, 1);
 
 	m_programID = GLUtil::LoadShader(VertexShaderCode, FragmentShaderCode);
-	
 	m_MatrixID = glGetUniformLocation(m_programID, "MVP");
-
+	//m_MatrixID = glGetUniformLocation(m_programID, std::format("MVP{}", m_nID).c_str());
 	//m_Projection = glm::perspective(glm::radians(45.0f), (float)rect.Width() / (float)rect.Height(), 0.1f, 100000.0f);
 	//m_Projection = glm::ortho(0.f, (float)rect.Width(), (float)rect.Height(), 0.f, 0.01f, 100000.f);
 	//m_Projection = glm::ortho(-(float)(m_clientwidth / 2.0), (float)(m_clientwidth / 2.0), (float)(m_clientheight / 2.0), -(float)(m_clientheight / 2.0), 0.01f, 100000.f);
@@ -97,10 +104,11 @@ void main() {
 	//	m_textureid = glGetUniformLocation(m_programID, "myTextureSampler");
 	//	glBindTexture(GL_TEXTURE_2D, 0);
 	//}
-
+	
 	glGenTextures(1, &m_texture);
 
 	m_textureid = glGetUniformLocation(m_programID, "myTextureSampler");
+	//m_textureid = glGetUniformLocation(m_programID, std::format("myTextureSampler{}", m_nID).c_str());
 
 	glGenVertexArrays(1, &m_VertexArrayID);
 	glBindVertexArray(m_VertexArrayID);
@@ -112,6 +120,7 @@ void main() {
 	glGenBuffers(1, &m_uvbuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, m_uvbuffer);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec2(0, 0)) * m_vecUv2.size(), m_vecUv2.data(), GL_STATIC_DRAW);
+	auto isprg = glIsProgram(m_programID);
 }
 
 void GLImage::Final()
@@ -128,6 +137,16 @@ void GLImage::Final()
 
 void GLImage::Draw()
 {
+	//auto context = wglGetCurrentContext();
+	auto isprogram = glIsProgram(m_programID);
+	if (isprogram == 0)
+	{
+		Init(m_clientwidth, m_clientheight, m_nID);
+		
+		OutputDebugStringA("---------------------------------isprogram Created.\n ");
+		GLUtil::GetGLError();
+	}
+	isprogram = glIsProgram(m_programID);
 	m_dCurrFrameTime = glfwGetTime();
 	m_nFPSUpdate++;
 	if (m_dCurrFrameTime - m_dPrevFrameTime > 1.0)
@@ -152,15 +171,12 @@ void GLImage::Draw()
 	// 
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
-
 	// Use our shader
 	glUseProgram(m_programID);
-
 	//glUniformMatrix4fv(m_MatrixID, 1, GL_FALSE, &m_mvp[0][0]);
 	glUniformMatrix4fv(m_MatrixID, 1, GL_FALSE, glm::value_ptr(m_mvp));
-
+	
 	glBindVertexArray(m_VertexArrayID);
-
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, m_texture);
 	glUniform1i(m_textureid, 0);
@@ -347,6 +363,7 @@ void GLImage::LoadImg(std::string strfilename)
 		double dHalfWidth = m_matImg.cols / 2.0;
 		double dHalfHeight = m_matImg.rows / 2.0;
 
+		glfwMakeContextCurrent(m_parent->GetWindowContext());
 		m_vecData2[0] = glm::vec3(static_cast<float>(-dHalfWidth), static_cast<float>(+dHalfHeight), 0);
 		m_vecData2[1] = glm::vec3(static_cast<float>(-dHalfWidth), static_cast<float>(-dHalfHeight), 0);
 		m_vecData2[2] = glm::vec3(static_cast<float>(+dHalfWidth), static_cast<float>(+dHalfHeight), 0);
@@ -402,8 +419,7 @@ void GLImage::SetImage(cv::Mat matSrc)
 	m_vecData2[3] = glm::vec3(static_cast<float>(+dHalfWidth), static_cast<float>(+dHalfHeight), 0);
 	m_vecData2[4] = glm::vec3(static_cast<float>(-dHalfWidth), static_cast<float>(-dHalfHeight), 0);
 	m_vecData2[5] = glm::vec3(static_cast<float>(+dHalfWidth), static_cast<float>(-dHalfHeight), 0);
-
-
+	glfwMakeContextCurrent(m_parent->GetWindowContext());
 	glBindBuffer(GL_ARRAY_BUFFER, m_vertexbuffer);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3(0, 0, 0)) * m_vecData2.size(), m_vecData2.data(), GL_STATIC_DRAW);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);

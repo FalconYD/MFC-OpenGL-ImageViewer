@@ -131,17 +131,19 @@ auto COGLViewerApp::stopthread() -> void
 auto COGLViewerApp::THREAD_UPDATE(void* pParam)->UINT
 {
 
-	while (true)
+	while (theApp.bWork)
 	{
 		for (auto& it : theApp.m_mapControls)
 		{
 			if (it.second.pImageViewer != nullptr)
 			{
+				it.second.pImageViewer->SelectGLWindow();
 				it.second.pImageViewer->UpdateDraw();
 			}
 		}
+		
 		glfwPollEvents();
-		Sleep(1);
+		Sleep(10);
 
 	}
 	return 0;
@@ -159,14 +161,8 @@ DLLTYPE void _libAddCtrl(int id, CWnd* parentWnd)
 	RECT rect;
 	parentWnd->GetDlgItem(id)->GetWindowRect(&rect);
 	parentWnd->ScreenToClient(&rect);
-	if (theApp.m_mapControls.size() == 1)
-	{
-		theApp.m_mapControls[id].pImageViewer->Create(WS_CHILD | WS_VISIBLE, rect, parentWnd, id);
-	}
-	else
-	{
-		theApp.m_mapControls[id].pImageViewer->Create(WS_CHILD | WS_VISIBLE, rect, parentWnd, id, theApp.m_mapControls.begin()->second.pImageViewer->GetGLWindow());
-	}
+
+	theApp.m_mapControls[id].pImageViewer->Create(WS_CHILD | WS_VISIBLE, rect, parentWnd, id);
 	//theApp.m_mapControls[id].pImageViewer->Create(WS_CHILD | WS_VISIBLE, rect, parentWnd, id);
 }
 
@@ -179,6 +175,7 @@ DLLTYPE void _libInitCtrl()
 	for (auto& it : theApp.m_mapControls)
 	{
 		it.second.pImageViewer->GLLoad();
+		GLUtil::GetGLError();
 	}
 	//theApp.startthread();
 }

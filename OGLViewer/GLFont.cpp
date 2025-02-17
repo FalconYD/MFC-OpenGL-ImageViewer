@@ -17,7 +17,7 @@ void GLFont::SetFontName(std::string fontname)
     this->fontname = fontname;
 }
 
-void GLFont::Init(int clientwidth, int clientHeight)
+void GLFont::Init(int clientwidth, int clientHeight, int id)
 {
     this->clientwidth = clientwidth;
     this->clientheight = clientHeight;
@@ -227,6 +227,7 @@ void main()\n\
 
 void GLFont::RenderText(std::string text, float x, float y, float scale, glm::vec3 color)
 {
+    auto win = glfwGetCurrentContext();
     // activate corresponding render state	
     //s.Use();
     //glClearColor(0.2f, 0.3f, 0.3f, 1.0f);

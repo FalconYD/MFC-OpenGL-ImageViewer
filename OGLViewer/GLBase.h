@@ -2,7 +2,7 @@
 class GLBase
 {
 public:
-	virtual void Init(int clientwidth, int clientheight) = 0;
+	virtual void Init(int clientwidth, int clientheight, int id) = 0;
 	virtual void Final() = 0;
 
 	virtual void Draw() = 0;

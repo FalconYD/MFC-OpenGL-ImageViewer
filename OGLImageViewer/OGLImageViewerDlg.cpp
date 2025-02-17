@@ -225,7 +225,7 @@ void COGLImageViewerDlg::OnBnClickedButton2()
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	if (!m_bCap)
 	{
-		m_cap.open(0);
+		m_cap.open(1);
 		SetTimer(1001, 10, nullptr);
 		m_bCap = true;
 	}

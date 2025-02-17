@@ -76,7 +76,7 @@ public:
 
 	void SetRectangle(float x, float y, float w, float h, glm::vec3 color, float thick);
 
-	virtual void Init(int clientwidth, int clientheight);
+	virtual void Init(int clientwidth, int clientheight, int id);
 	virtual void Final();
 	virtual void Draw();
 	virtual void OnSize(int width, int height);

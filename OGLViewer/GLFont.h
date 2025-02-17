@@ -45,7 +45,7 @@ public:
     void SetFontName(std::string fontname);
     void SetText(std::string key, std::string text, float x, float y, float scale, glm::vec3 color, EN_TEXTSTYLE enStyle = EN_TEXTSTYLE::EN_STATICTEXT, cbBindDouble cbdb = nullptr, cbBindPoint cbpnt = nullptr);
 
-    virtual void Init(int clientwidth, int clientheight);
+    virtual void Init(int clientwidth, int clientheight, int id);
     virtual void Final();
     virtual void Draw();
     virtual void OnSize(int width, int height);

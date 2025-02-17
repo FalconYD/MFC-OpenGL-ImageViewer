@@ -64,7 +64,6 @@ public:
             TRACE("%s\n", &ProgramErrorMessage[0]);
         }
 
-
         glDetachShader(ProgramID, VertexShaderID);
         glDetachShader(ProgramID, FragmentShaderID);
 
@@ -112,10 +111,24 @@ public:
     //    return str;
     //}
 
+    static std::string Replace(std::string& src, std::string org, std::string replace)
+    {
+        int idx = src.find(org);
+        std::string strRtn;
+        strRtn = src;
+        while (0 <= idx)
+        {
+            strRtn = src.replace(idx, org.length(), replace);
+            idx = strRtn.find(org, idx+ replace.length());
+        }
+        return strRtn;
+    }
+
     static std::string GetGLError()
     {
-        std::string strOut((char*)glewGetErrorString(glGetError()));
-        OutputDebugStringA(std::format("{}\n", strOut).c_str());
+        auto err = glGetError();
+        std::string strOut((char*)glewGetErrorString(err));
+        OutputDebugStringA(std::format("[{}] {}\n", err, strOut).c_str());
         return strOut;
         //return "";
     }

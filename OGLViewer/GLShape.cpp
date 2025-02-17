@@ -13,7 +13,7 @@ GLShape::~GLShape()
 
 }
 
-void GLShape::Init(int clientwidth, int clientheight)
+void GLShape::Init(int clientwidth, int clientheight, int id)
 {
 	m_clientwidth = clientwidth;
 	m_clientheight = clientheight;

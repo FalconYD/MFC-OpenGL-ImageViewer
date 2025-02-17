@@ -1,11 +1,14 @@
 #pragma once
+#include "GLWindow.h"
+
 class GLImage : GLBase
 {
 public:
-	GLImage();
+	GLImage(GLWindow* parent);
 	~GLImage();
 private:
-
+	GLWindow* m_parent;
+	int m_nID;
 	GLuint m_texture;
 	GLuint m_textureid;
 	GLuint m_vertexbuffer;
@@ -50,7 +53,7 @@ private:
 	inline float getimgposy(float y);
 	inline float getimgposx(float x);
 public:
-	virtual void Init(int clientwidth, int clientheight);
+	virtual void Init(int clientwidth, int clientheight, int id);
 	virtual void Final();
 	virtual void Draw();
 	virtual void OnSize(int width, int height);

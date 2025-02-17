@@ -27,7 +27,7 @@ private:
 public:
 	ImageViewer();
 	virtual ~ImageViewer();
-	virtual BOOL Create(DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID = NULL, GLFWwindow* sharedwindow = nullptr);
+	virtual BOOL Create(DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID = NULL);
 	afx_msg void OnPaint();
 	afx_msg void OnTimer(UINT_PTR nIDEvent);
 
