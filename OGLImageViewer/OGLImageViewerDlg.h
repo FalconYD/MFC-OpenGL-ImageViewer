@@ -3,6 +3,7 @@
 //
 
 #pragma once
+#include "TestDlg.h"
 
 
 // COGLImageViewerDlg 대화 상자
@@ -44,4 +45,6 @@ public:
 	afx_msg void OnTimer(UINT_PTR nIDEvent);
 	afx_msg void OnBnClickedBnShape();
 	afx_msg void OnBnClickedButton3();
+
+	TestDlg testdlg;
 };

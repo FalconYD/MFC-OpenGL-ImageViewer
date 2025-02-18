@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "GLImage.h"
 
+#include <algorithm>
+
 GLImage::GLImage(GLWindow* parent)
 {
 	m_parent = parent;
@@ -242,8 +244,6 @@ void GLImage::MouseMove(GLFWwindow* win, double xpos, double ypos)
 		m_move += m_currPoint - m_prevPoint;
 		m_prevPoint = m_currPoint;
 
-
-
 		m_translate = glm::translate(glm::mat4(), m_move);
 	}
 	break;
@@ -294,7 +294,7 @@ void GLImage::MouseScroll(GLFWwindow* win, double xpos, double ypos)
 {
 	if (ypos != 0.0f)
 	{
-		ScaleZoom(ypos);
+		ScaleZoom(static_cast<int>(ypos));
 		//float prevx = getimgposx(m_movePoint.x);
 		//float prevy = getimgposy(m_movePoint.y);
 		//if (ypos > 0)
@@ -391,7 +391,7 @@ float GLImage::getfitscale()
 	return fitscale;
 }
 
-void GLImage::LoadImg(std::string strfilename)
+void GLImage::LoadImg(const std::string& strfilename)
 {
 	cv::imread(strfilename, cv::ImreadModes::IMREAD_UNCHANGED).copyTo(m_matImg);
 
@@ -433,6 +433,12 @@ void GLImage::LoadImg(std::string strfilename)
 	}
 }
 
+void GLImage::SaveImg(const std::string& strfilename)
+{
+	if (!m_matImg.empty())
+		cv::imwrite(strfilename, m_matImg);
+}
+
 double GLImage::GetFrameRate() const
 {
 	return m_dFrameRate;
@@ -440,7 +446,12 @@ double GLImage::GetFrameRate() const
 
 cv::Point2d GLImage::GetNowPoint()
 {
-	return cv::Point2d(getimgposx(m_movePoint.x), getimgposy(m_movePoint.y));
+	auto pnt = cv::Point2d(getimgposx(m_movePoint.x), getimgposy(m_movePoint.y));
+	pnt.x = std::max(pnt.x, 0.0);
+	pnt.y = std::max(pnt.y, 0.0);
+	pnt.x = std::min(pnt.x, static_cast<const double&>(m_matImg.cols));
+	pnt.y = std::min(pnt.y, static_cast<const double&>(m_matImg.rows));
+	return pnt;
 }
 
 cv::Point2d GLImage::GetNowPoint2()
@@ -487,8 +498,13 @@ void GLImage::SetImage(cv::Mat matSrc)
 cv::Vec3b GLImage::GetPixel(int x, int y)
 {
 	cv::Vec3b rtn{};
-	if (!m_matImg.empty() && m_matImg.cols > x && m_matImg.rows > y && x >= 0 && y >= 0)
+	if (!m_matImg.empty())
 	{
+		x = std::max(x, 0);
+		y = std::max(y, 0);
+		x = std::min(x, m_matImg.cols - 1);
+		y = std::min(y, m_matImg.rows - 1);
+
 		switch (m_matImg.channels())
 		{
 		case 1:

@@ -111,9 +111,11 @@ BOOL COGLImageViewerDlg::OnInitDialog()
 	SetIcon(m_hIcon, TRUE);			// 큰 아이콘을 설정합니다.
 	SetIcon(m_hIcon, FALSE);		// 작은 아이콘을 설정합니다.
 
+	testdlg.Create(IDD_DIALOG1);
 	// TODO: 여기에 추가 초기화 작업을 추가합니다.
 	_libAddCtrl(IDC_PIC, this);
 	_libAddCtrl(IDC_PIC2, this);
+	_libAddCtrl(IDC_STATIC_PIC, &testdlg);
 
 	_libInitCtrl();
 	//_libInitCtrl(this, IDC_PIC);
@@ -260,7 +262,7 @@ void COGLImageViewerDlg::OnTimer(UINT_PTR nIDEvent)
 void COGLImageViewerDlg::OnBnClickedBnShape()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-
+	testdlg.ShowWindow(SW_SHOW);
 }
 
 

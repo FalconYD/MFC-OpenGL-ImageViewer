@@ -36,10 +36,10 @@ void GLFont::Final()
 void GLFont::SetText(std::string key, std::string text, float x, float y, float scale, glm::vec3 color, EN_TEXTSTYLE enStyle, cbBindDouble cbdb, cbBindPoint cbpnt)
 {
     
-    if (mapText.find(key) == mapText.end())
+    if (!mapText.contains(key))
     {
-        mapText.insert(std::make_pair(key, vecTextList.size()));
-        vecTextList.push_back(std::make_tuple(text, x, y, scale, color, enStyle, cbdb, cbpnt));
+        mapText.insert(std::make_pair(key, static_cast<int>(vecTextList.size())));
+        vecTextList.emplace_back(text, x, y, scale, color, enStyle, cbdb, cbpnt);
     }
     else
     {
@@ -303,7 +303,7 @@ void GLFont::RenderText(std::string text, float x, float y, float scale, glm::ve
 
 void GLFont::BindTextFunc(std::string key, std::string strFormat)
 {
-    if (mapText.find(key) != mapText.end())
+    if (mapText.contains(key))
     {
         std::get<0>(vecTextList[mapText[key]]) = strFormat;
     }

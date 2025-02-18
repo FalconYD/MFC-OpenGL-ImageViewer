@@ -40,11 +40,13 @@ ImageViewer::ImageViewer()
 	m_pGLImage = nullptr;
 	m_pGLText = nullptr;
 	m_pGLShape = nullptr;
+
 }
 
 ImageViewer::~ImageViewer()
 {
 	g_pImgView = nullptr;
+	FinalCtrl();
 }
 auto ImageViewer::SelectGLWindow() -> void
 {
@@ -62,7 +64,7 @@ auto ImageViewer::GetGLWindow() -> GLFWwindow*
 		return m_pGL->GetWindowContext();
 }
 
-auto ImageViewer::DrawCtrl()->void
+auto ImageViewer::InitCtrl()->void
 {
 	/** 컨트롤 배치 하부로 이동. Taeroo-kgseon 2024.12.31 17:48:48 */
 	CRect rectTemp;
@@ -142,6 +144,70 @@ auto ImageViewer::DrawCtrl()->void
 	m_stImgInfo->Create(_T("W:0 H:0"), WS_CHILD | WS_VISIBLE | WS_BORDER | SS_CENTER, rectTemp, this);
 
 }
+auto ImageViewer::FinalCtrl()->void
+{
+	if (m_bnOpen != nullptr)
+	{
+		m_bnOpen->DestroyWindow();
+		delete m_bnOpen;
+		m_bnOpen = nullptr;
+	}
+	if (m_bnSave != nullptr)
+	{
+		m_bnSave->DestroyWindow();
+		delete m_bnSave;
+		m_bnSave = nullptr;
+	}
+	if (m_bn1X != nullptr)
+	{
+		m_bn1X->DestroyWindow();
+		delete m_bn1X;
+		m_bn1X = nullptr;
+	}
+	if (m_bnFit != nullptr)
+	{
+		m_bnFit->DestroyWindow();
+		delete m_bnFit;
+		m_bnFit = nullptr;
+	}
+	if (m_bnIn != nullptr)
+	{
+		m_bnIn->DestroyWindow();
+		delete m_bnIn;
+		m_bnIn = nullptr;
+	}
+	if (m_bnOut != nullptr)
+	{
+		m_bnOut->DestroyWindow();
+		delete m_bnOut;
+		m_bnOut = nullptr;
+	}
+
+	if (m_stPos != nullptr)
+	{
+		m_stPos->DestroyWindow();
+		delete m_stPos;
+		m_stPos = nullptr;
+	}
+	if (m_stColor != nullptr)
+	{
+		m_stColor->DestroyWindow();
+		delete m_stColor;
+		m_stColor = nullptr;
+	}
+	if (m_stScale != nullptr)
+	{
+		m_stScale->DestroyWindow();
+		delete m_stScale;
+		m_stScale = nullptr;
+	}
+	if (m_stImgInfo != nullptr)
+	{
+		m_stImgInfo->DestroyWindow();
+		delete m_stImgInfo;
+		m_stImgInfo = nullptr;
+	}
+}
 
 BOOL ImageViewer::Create(DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID)
 {
@@ -160,7 +226,7 @@ BOOL ImageViewer::Create(DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT
 
 	if (result != 0)
 	{
-		DrawCtrl();
+		InitCtrl();
 		m_pGL = new GLWindow();
 		m_pGL->Init(pParentWnd, nID, m_rectImageView);
 
@@ -204,7 +270,7 @@ auto ImageViewer::GLLoad() -> void
 	double dHalfWidth = m_pGL->GetClientRect().Width() / 2.f;
 	double dHalfHeight = m_pGL->GetClientRect().Height() / 2.f;
 
-
+	m_pGL->Select();
 	m_pGLImage = new GLImage(m_pGL);
 	m_pGLImage->Init(m_pGL->GetClientRect().Width(), m_pGL->GetClientRect().Height(), m_nID);
 	m_pGL->Add((GLBase*)m_pGLImage);
@@ -220,15 +286,15 @@ auto ImageViewer::GLLoad() -> void
 	//m_pGLText->SetText("WH", "WH : %.2lf, %.2lf", static_cast<float>(-dHalfWidth + 5), static_cast<float>(-dHalfHeight + 5), 0.4f, glm::vec3(1.0, 0.0, 1.0), EN_TEXTSTYLE::EN_BINDING, nullptr, cbWidthHeight);
 	//
 	//m_pGL->Add((GLBase*)m_pGLText);
-
-
+	//
+	//
 	//m_pGLShape = new GLShape();
 	//m_pGLShape->Init(m_pGL->GetClientRect().Width(), m_pGL->GetClientRect().Height(), m_nID);
 	//m_pGLShape->AddRectangle(-100, -100, 100, 100, glm::vec3(1,0,0), 1);
 	//m_pGLShape->AddCircle(-50, -50, 100, 100, glm::vec3(0,1,0), 1);
 	//m_pGL->Add((GLBase*)m_pGLShape);
 
-	SetTimer(EN_TIMER, 1, nullptr);
+	SetTimer(EN_TIMER, 17, nullptr);
 }
 
 void ImageViewer::OnPaint()
@@ -253,11 +319,30 @@ void ImageViewer::OnTimer(UINT_PTR nIDEvent)
 		{
 			m_pGL->UpdateDraw(m_nID);
 
-			m_stImgInfo->SetWindowText(std::format(_T("W:{} H:{}"), m_pGLImage->GetImageWidth(), m_pGLImage->GetImageHeight()).c_str());
-			m_stScale->SetWindowText(std::format(_T("Scale : {:.2f}x"), m_pGLImage->GetScale()).c_str());
-			auto pixel = m_pGLImage->GetPixel(m_pGLImage->GetNowPoint().x, m_pGLImage->GetNowPoint().y);
-			m_stColor->SetWindowText(std::format(_T("R: {} G: {} B: {}"), pixel[2], pixel[1], pixel[0]).c_str());
-			m_stPos->SetWindowText(std::format(_T("X: {:.1f}, Y: {:.1f}"), m_pGLImage->GetNowPoint().x, m_pGLImage->GetNowPoint().y).c_str());
+			if (m_nWidth != m_pGLImage->GetImageWidth() || m_nHeight != m_pGLImage->GetImageHeight())
+			{
+				m_nWidth = m_pGLImage->GetImageWidth();
+				m_nHeight = m_pGLImage->GetImageHeight();
+				m_stImgInfo->SetWindowText(std::format(_T("W:{} H:{}"), m_nWidth, m_nHeight).c_str());
+			}
+
+			if (m_dScale != m_pGLImage->GetScale())
+			{
+				m_dScale = m_pGLImage->GetScale();
+				m_stScale->SetWindowText(std::format(_T("Scale : {:.2f}x"), m_dScale).c_str());
+			}
+
+			if (m_pntCurr != m_pGLImage->GetNowPoint())
+			{
+				m_pntCurr = m_pGLImage->GetNowPoint();
+				m_stPos->SetWindowText(std::format(_T("X: {:.1f}, Y: {:.1f}"), m_pntCurr.x, m_pntCurr.y).c_str());
+			}
+
+			if (m_vecRGB != m_pGLImage->GetPixel(static_cast<int>(m_pntCurr.x), static_cast<int>(m_pntCurr.y)))
+			{
+				m_vecRGB = m_pGLImage->GetPixel(static_cast<int>(m_pntCurr.x), static_cast<int>(m_pntCurr.y));
+				m_stColor->SetWindowText(std::format(_T("R: {} G: {} B: {}"), m_vecRGB[2], m_vecRGB[1], m_vecRGB[0]).c_str());
+			}
 			//glfwPollEvents();
 		}
 		break;
@@ -355,7 +440,7 @@ void ImageViewer::SetImg(cv::Mat matSrc)
 
 void ImageViewer::OnClickOpen()
 {
-	CFileDialog dlg(TRUE, _T("Image File | *.bmp"));
+	CFileDialog dlg(TRUE, NULL,NULL, OFN_EXPLORER,_T("Image File|*.bmp;*.jpg;*.jpeg;*.tiff;*.png|"));
 	if (dlg.DoModal() == TRUE)
 	{
 		m_pGLImage->LoadImg(CT2A(dlg.GetPathName()).m_psz);
@@ -363,10 +448,10 @@ void ImageViewer::OnClickOpen()
 }
 void ImageViewer::OnClickSave()
 {
-	CFileDialog dlg(FALSE, _T("Image File | *.bmp"));
+	CFileDialog dlg(FALSE, NULL, NULL, OFN_EXPLORER, _T("Image File|*.bmp;*.jpg;*.jpeg;*.tiff;*.png|"));
 	if (dlg.DoModal() == TRUE)
 	{
-		//SaveImage(dlg.GetPathName());
+		m_pGLImage->SaveImg(CT2A(dlg.GetPathName()).m_psz);
 	}
 }
 void ImageViewer::OnClick1x()

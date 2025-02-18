@@ -111,15 +111,14 @@ public:
     //    return str;
     //}
 
-    static std::string Replace(std::string& src, std::string org, std::string replace)
+    static std::string Replace(std::string& src, const std::string& org, const std::string& replace)
     {
-        int idx = src.find(org);
-        std::string strRtn;
-        strRtn = src;
+        int idx = static_cast<int>(src.find(org));
+        std::string strRtn = src;
         while (0 <= idx)
         {
             strRtn = src.replace(idx, org.length(), replace);
-            idx = strRtn.find(org, idx+ replace.length());
+            idx = static_cast<int>(strRtn.find(org, idx+ replace.length()));
         }
         return strRtn;
     }

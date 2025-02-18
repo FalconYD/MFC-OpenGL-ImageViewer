@@ -117,11 +117,20 @@ void GLShape::Final()
 
 void GLShape::Draw()
 {
+    auto isprogram = glIsProgram(m_programID);
+    if (isprogram == 0)
+    {
+        Init(m_clientwidth, m_clientheight, 0);
+
+        OutputDebugStringA("---------------------------------isprogram Created.\n ");
+        GLUtil::GetGLError();
+    }
+
     m_Model = m_translate * m_scale * glm::mat4(1.0f);
     m_mvp = m_Projection * m_Model;
 
     glUseProgram(m_programID);
-    glUniform2f(m_locres, m_clientwidth, m_clientheight);
+    glUniform2f(m_locres, static_cast<GLfloat>(m_clientwidth), static_cast<GLfloat>(m_clientheight));
     glUniformMatrix4fv(m_locmvp, 1, GL_FALSE, glm::value_ptr(m_mvp));
     glBindVertexArray(vao);
 
@@ -229,10 +238,10 @@ void GLShape::MouseScroll(GLFWwindow* win, double xpos, double ypos)
         m_move.y += (curry - prevy) * m_zoom.y;
         m_translate = glm::translate(glm::mat4(), m_move);
 
-        for (int i = 0; i < vshapes.size(); i++)
-        {
-            vshapes[i].thick = 1.0 * m_zoom.x;
-        }
+        //for (int i = 0; i < vshapes.size(); i++)
+        //{
+        //    vshapes[i].thick = 1.0 * m_zoom.x;
+        //}
     }
 }
 

@@ -71,7 +71,8 @@ public:
 
 	void SetImage(cv::Mat matSrc);
 
-	void LoadImg(std::string strfilename);
+	void LoadImg(const std::string& strfilename);
+	void SaveImg(const std::string& strfilename);
 
 	int GetImageWidth() const { return m_matImg.cols; }
 	int GetImageHeight() const { return m_matImg.rows; }

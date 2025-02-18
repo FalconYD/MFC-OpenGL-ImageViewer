@@ -43,11 +43,18 @@ private:
 
 	static ImageViewer* g_pImgView;
 	bool m_bDestroy;
+
+	int m_nWidth;
+	int m_nHeight;
+	double m_dScale;
+	cv::Point2d m_pntCurr;
+	cv::Vec3b m_vecRGB;
 public:
 	ImageViewer();
 	virtual ~ImageViewer();
 	virtual BOOL Create(DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID = NULL);
-	auto DrawCtrl() -> void;
+	auto InitCtrl() -> void;
+	auto FinalCtrl() -> void;
 	afx_msg void OnPaint();
 	afx_msg void OnTimer(UINT_PTR nIDEvent);
 

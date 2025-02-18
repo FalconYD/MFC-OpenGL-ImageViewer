@@ -98,13 +98,11 @@ void GLWindow::UpdateDraw(int id)
 	if (glfwGetCurrentContext() == m_window)
 	{
 		//OutputDebugStringA(std::format("{:x} {}\n", (unsigned long long)m_window, id).c_str());
-		if (m_nID == 1000)
-			glClearColor(0.0f, 0.0f, 0.4f, 1.0f);
-		else
-			glClearColor(0.4f, 0.0f, 0.0f, 1.0f);
-		
+
+		glClearColor(0.0f, 0.0f, 0.4f, 1.0f);
+
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		
+
 		for (int i = 0; i < base.size(); i++)
 		{
 			base[i]->Draw();
@@ -124,6 +122,7 @@ void GLWindow::Add(GLBase* child)
 void GLWindow::Remove(GLBase* child)
 {
 	base.clear();
+	//base.erase(child);
 	//if (base.size() > 0)
 	//{
 	//	//base.erase()
@@ -138,7 +137,7 @@ void GLWindow::Remove(GLBase* child)
 void GLWindow::MouseButtonCallBack(GLFWwindow* win, int button, int action, int mods)
 {
 	auto ptr = static_cast<GLWindow*>(glfwGetWindowUserPointer(win));
-	for (int i = 0; i < gWin->base.size(); i++)
+	for (int i = 0; i < ptr->base.size(); i++)
 	{
 		ptr->base[i]->MouseButton(win, button, action, mods);
 	}
@@ -148,7 +147,7 @@ void GLWindow::MouseButtonCallBack(GLFWwindow* win, int button, int action, int 
 void GLWindow::MouseMoveCallBack(GLFWwindow* win, double xpos, double ypos)
 {
 	auto ptr = static_cast<GLWindow*>(glfwGetWindowUserPointer(win));
-	for (int i = 0; i < gWin->base.size(); i++)
+	for (int i = 0; i < ptr->base.size(); i++)
 	{
 		ptr->base[i]->MouseMove(win, xpos, ypos);
 	}
@@ -158,7 +157,7 @@ void GLWindow::MouseMoveCallBack(GLFWwindow* win, double xpos, double ypos)
 void GLWindow::MouseScrollCallBack(GLFWwindow* win, double xpos, double ypos)
 {
 	auto ptr = static_cast<GLWindow*>(glfwGetWindowUserPointer(win));
-	for (int i = 0; i < gWin->base.size(); i++)
+	for (int i = 0; i < ptr->base.size(); i++)
 	{
 		ptr->base[i]->MouseScroll(win, xpos, ypos);
 	}
@@ -168,7 +167,7 @@ void GLWindow::MouseScrollCallBack(GLFWwindow* win, double xpos, double ypos)
 void GLWindow::KeyboardCallBack(GLFWwindow* win, int key, int scancode, int action, int mods)
 {
 	auto ptr = static_cast<GLWindow*>(glfwGetWindowUserPointer(win));
-	for (int i = 0; i < gWin->base.size(); i++)
+	for (int i = 0; i < ptr->base.size(); i++)
 	{
 		ptr->base[i]->KeyboardCallback(win, key, scancode, action, mods);
 	}
@@ -185,7 +184,7 @@ void GLWindow::OnSize(int width, int height)
 	{
 		base[i]->OnSize(width, height);
 	}
-	
+
 	glfwSetWindowSize(m_window, width, height);
 	glViewport(0, 0, width, height);
 }
